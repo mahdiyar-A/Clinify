@@ -7,6 +7,7 @@ CPSC 471 - Group 27
 
 1. Get the `.env` file in the root folder
 2. Create virtual environment and activate it
+```bash 
 python -m venv venv
 venv\Scripts\activate
 ```
