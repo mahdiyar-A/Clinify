@@ -4,18 +4,10 @@
 
 {% block nav %}
 <span class="nav-label">Menu</span>
-<a href="{% url 'doctor_dashboard' %}" class="nav-link">
-    <span class="icon">⊞</span> Dashboard
-</a>
-<a href="{% url 'doctor_schedule' %}" class="nav-link">
-    <span class="icon">📅</span> Schedule
-</a>
-<a href="{% url 'doctor_availability' %}" class="nav-link">
-    <span class="icon">🕐</span> Availability
-</a>
-<a href="{% url 'doctor_prescriptions' %}" class="nav-link">
-    <span class="icon">💊</span> Prescriptions
-</a>
+<a href="{% url 'doctor_dashboard' %}" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+<a href="{% url 'doctor_schedule' %}" class="nav-link"><span class="icon">📅</span> Schedule</a>
+<a href="{% url 'doctor_availability' %}" class="nav-link"><span class="icon">🕐</span> Availability</a>
+<a href="{% url 'doctor_prescriptions' %}" class="nav-link active"><span class="icon">💊</span> Prescriptions</a>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +16,6 @@
     <p>Create and manage prescriptions.</p>
 </div>
 
-<!-- CREATE FORM -->
 <div class="card">
     <div class="card-title">New Prescription</div>
     <form method="POST">
@@ -34,7 +25,7 @@
             <select name="visit_id" required>
                 <option value="">Select a visit</option>
                 {% for v in visits %}
-                <option value="{{ v.0 }}">{{ v.2 }} — {{ v.1 }}</option>
+                <option value="{{ v.0 }}">{{ v.2 }} — {{ v.1|date:"M d, Y" }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -66,25 +57,18 @@
     </form>
 </div>
 
-<!-- LIST -->
 <div class="card">
     <div class="card-title">Issued Prescriptions</div>
     {% if prescriptions %}
     <div class="table-wrap">
         <table>
             <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Patient</th>
-                    <th>Medication</th>
-                    <th>Frequency</th>
-                    <th>Duration</th>
-                </tr>
+                <tr><th>Date</th><th>Patient</th><th>Medication</th><th>Frequency</th><th>Duration</th></tr>
             </thead>
             <tbody>
                 {% for p in prescriptions %}
                 <tr>
-                    <td>{{ p.1 }}</td>
+                    <td>{{ p.1|date:"M d, Y" }}</td>
                     <td>{{ p.2 }}</td>
                     <td>{{ p.3 }}</td>
                     <td>{{ p.4 }}</td>

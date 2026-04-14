@@ -4,26 +4,15 @@
 
 {% block nav %}
 <span class="nav-label">Menu</span>
-<a href="{% url 'patient_dashboard' %}" class="nav-link">
-    <span class="icon">⊞</span> Dashboard
-</a>
-<a href="{% url 'patient_appointments' %}" class="nav-link active">
-    <span class="icon">📅</span> Appointments
-</a>
-<a href="{% url 'patient_medical_history' %}" class="nav-link">
-    <span class="icon">📋</span> Medical History
-</a>
-<a href="{% url 'patient_prescriptions' %}" class="nav-link">
-    <span class="icon">💊</span> Prescriptions
-</a>
-<a href="{% url 'patient_profile' %}" class="nav-link">
-    <span class="icon">👤</span> Profile
-</a>
+<a href="{% url 'patient_dashboard' %}" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+<a href="{% url 'patient_appointments' %}" class="nav-link active"><span class="icon">📅</span> Appointments</a>
+<a href="{% url 'patient_medical_history' %}" class="nav-link"><span class="icon">📋</span> Medical History</a>
+<a href="{% url 'patient_prescriptions' %}" class="nav-link"><span class="icon">💊</span> Prescriptions</a>
+<a href="{% url 'patient_profile' %}" class="nav-link"><span class="icon">👤</span> Profile</a>
 {% endblock %}
 
 {% block content %}
 
-{# pass JSON to JS safely via data attribute to avoid linter errors #}
 <div id="availability-data" data-json="{{ availability_json }}" style="display:none;"></div>
 
 <div class="page-header">
@@ -79,21 +68,14 @@
     <div class="table-wrap">
         <table>
             <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Doctor</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
+                <tr><th>Date</th><th>Time</th><th>Doctor</th><th>Reason</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
                 {% for a in appointments %}
                 <tr>
-                    <td>{{ a.1 }}</td>
-                    <td>{{ a.2 }}</td>
-                    <td>{{ a.5 }}</td>
+                    <td>{{ a.1|date:"M d, Y" }}</td>
+                    <td>{{ a.2|time:"H:i" }}</td>
+                    <td>Dr. {{ a.5 }}</td>
                     <td>{{ a.4 }}</td>
                     <td><span class="badge badge-{{ a.3|lower }}">{{ a.3 }}</span></td>
                     <td style="display:flex; gap:6px;">
@@ -103,9 +85,7 @@
                             <input type="hidden" name="cancel_id" value="{{ a.0 }}">
                             <button type="submit" name="action" value="cancel" class="btn btn-danger btn-sm">Cancel</button>
                         </form>
-                        <button class="btn btn-outline btn-sm" onclick="openReschedule('{{ a.0 }}')">
-                            Reschedule
-                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="openReschedule('{{ a.0 }}')">Reschedule</button>
                         {% endif %}
                     </td>
                 </tr>
@@ -118,7 +98,6 @@
     {% endif %}
 </div>
 
-<!-- RESCHEDULE MODAL -->
 <div class="modal-backdrop" id="reschedule-modal">
     <div class="modal">
         <h3>Reschedule Appointment</h3>
@@ -146,20 +125,18 @@
 </div>
 
 <script>
-// read JSON from data attribute — avoids Django template tag inside script block
-const availabilityData = JSON.parse(
+var availabilityData = JSON.parse(
     document.getElementById('availability-data').getAttribute('data-json')
 );
 
 function getUpcomingDates(dayName, count) {
-    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const target = days.indexOf(dayName);
-    const dates  = [];
-    const today  = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 1; i <= 60 && dates.length < count; i++) {
-        const d = new Date(today);
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var target = days.indexOf(dayName);
+    var dates = [];
+    var today = new Date();
+    today.setHours(0,0,0,0);
+    for (var i = 1; i <= 60 && dates.length < count; i++) {
+        var d = new Date(today);
         d.setDate(today.getDate() + i);
         if (d.getDay() === target) dates.push(d);
     }
@@ -167,44 +144,38 @@ function getUpcomingDates(dayName, count) {
 }
 
 function formatDate(d) {
-    return d.toLocaleDateString('en-CA', {
-        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-    });
+    return d.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
 }
 
 function toISODate(d) {
     return d.getFullYear() + '-' +
-           String(d.getMonth() + 1).padStart(2, '0') + '-' +
-           String(d.getDate()).padStart(2, '0');
+           String(d.getMonth()+1).padStart(2,'0') + '-' +
+           String(d.getDate()).padStart(2,'0');
 }
 
-document.getElementById('doctor-select').addEventListener('change', function () {
-    const doctorId = this.value;
-    const infoDiv  = document.getElementById('availability-info');
-    const listDiv  = document.getElementById('availability-list');
+document.getElementById('doctor-select').addEventListener('change', function() {
+    var doctorId = this.value;
+    var infoDiv  = document.getElementById('availability-info');
+    var listDiv  = document.getElementById('availability-list');
 
     if (!doctorId || !availabilityData[doctorId]) {
         infoDiv.style.display = 'none';
         return;
     }
 
-    const slots = availabilityData[doctorId];
-    let html = '';
-
+    var slots = availabilityData[doctorId];
+    var html  = '';
     slots.forEach(function(s) {
-        const upcoming = getUpcomingDates(s.day, 2);
+        var upcoming = getUpcomingDates(s.day, 2);
         upcoming.forEach(function(date) {
-            const isoStr  = toISODate(date);
-            const display = formatDate(date);
-            html += '<span ' +
-                'style="background:var(--primary-lt);color:var(--primary);' +
-                'padding:4px 12px;border-radius:20px;font-size:13px;cursor:pointer;" ' +
-                'onclick="fillDate(\'' + isoStr + '\')">' +
-                display + ' &nbsp;' + s.start + '–' + s.end +
-                '</span>';
+            var isoStr  = toISODate(date);
+            var display = formatDate(date);
+            html += '<span style="background:var(--primary-lt);color:var(--primary);' +
+                    'padding:4px 12px;border-radius:20px;font-size:13px;cursor:pointer;" ' +
+                    'onclick="fillDate(\'' + isoStr + '\')">' +
+                    display + ' &nbsp;' + s.start + '–' + s.end + '</span>';
         });
     });
-
     listDiv.innerHTML = html;
     infoDiv.style.display = 'block';
     updateTimeSlots();
@@ -221,19 +192,15 @@ function updateTimeSlots() {
     var doctorId   = document.getElementById('doctor-select').value;
     var dateInput  = document.getElementById('date-input').value;
     var timeSelect = document.getElementById('time-select');
-
     timeSelect.innerHTML = '<option value="">Select a time</option>';
     if (!doctorId || !dateInput || !availabilityData[doctorId]) return;
-
     var days    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     var dayName = days[new Date(dateInput + 'T00:00:00').getDay()];
     var slots   = availabilityData[doctorId].filter(function(s) { return s.day === dayName; });
-
     if (slots.length === 0) {
         timeSelect.innerHTML = '<option value="">Doctor not available on this date</option>';
         return;
     }
-
     slots.forEach(function(slot) {
         var current = slot.start;
         while (current < slot.end) {
@@ -242,9 +209,8 @@ function updateTimeSlots() {
             opt.textContent = current;
             timeSelect.appendChild(opt);
             var parts = current.split(':').map(Number);
-            var next  = new Date(0, 0, 0, parts[0], parts[1] + 30);
-            current   = String(next.getHours()).padStart(2, '0') + ':' +
-                        String(next.getMinutes()).padStart(2, '0');
+            var next  = new Date(0,0,0,parts[0],parts[1]+30);
+            current   = String(next.getHours()).padStart(2,'0') + ':' + String(next.getMinutes()).padStart(2,'0');
         }
     });
 }
