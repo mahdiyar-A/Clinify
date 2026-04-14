@@ -31,7 +31,10 @@
                     <td>{{ s.4 }}</td>
                     <td>{{ s.3 }}</td>
                     <td><span class="badge badge-{{ s.2|lower }}">{{ s.2 }}</span></td>
-                    <td><a href="{% url 'doctor_patient_record' patient_id=s.0 %}" class="btn btn-outline btn-sm">View Record</a></td>
+                    <td>
+                        {# s.5 = patient_id (added in updated stored procedure) #}
+                        <a href="{% url 'doctor_patient_record' patient_id=s.5 %}" class="btn btn-outline btn-sm">View Record</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
