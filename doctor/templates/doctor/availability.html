@@ -67,7 +67,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="day_of_week" value="{{ a.0 }}">
-                            <input type="hidden" name="start_time" value="{{ a.1 }}">
+                            <input type="hidden" name="start_time" value="{{ a.1|time:'H:i' }}">
                             <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                         </form>
                     </td>
