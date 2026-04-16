@@ -198,6 +198,32 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION get_doctor_schedule(
+    p_doctor_id INT,
+    p_date      DATE
+) RETURNS TABLE (
+    appointment_id INT,
+    appointment_time TIME,
+    status VARCHAR(20),
+    reason TEXT,
+    patient_name TEXT,
+    patient_id INT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT a.Appointment_ID, a.Appointment_Time, a.Status, a.Reason,
+           (u.First_Name || ' ' || u.Last_Name)::TEXT AS patient_name,
+           p.Patient_ID
+    FROM APPOINTMENT a
+    JOIN PATIENT p ON a.Patient_ID = p.Patient_ID
+    JOIN "USER" u ON p.Patient_ID = u.User_ID
+    WHERE a.Doctor_ID = p_doctor_id
+      AND a.Appointment_Date = p_date
+    ORDER BY a.Appointment_Time;
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION create_prescription(
     p_visit_id  INT,
     p_doctor_id INT
