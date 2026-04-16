@@ -161,9 +161,13 @@ CREATE OR REPLACE FUNCTION book_appointment(
     p_time       TIME,
     p_reason     TEXT
 ) RETURNS VOID AS $$
+DECLARE
+    v_admin_id INT;
 BEGIN
-    INSERT INTO APPOINTMENT (Appointment_Date, Appointment_Time, Status, Reason, Patient_ID, Doctor_ID)
-    VALUES (p_date, p_time, 'Scheduled', p_reason, p_patient_id, p_doctor_id);
+    SELECT Admin_ID INTO v_admin_id FROM ADMIN ORDER BY Admin_ID LIMIT 1;
+
+    INSERT INTO APPOINTMENT (Appointment_Date, Appointment_Time, Status, Reason, Patient_ID, Doctor_ID, Admin_ID)
+    VALUES (p_date, p_time, 'Scheduled', p_reason, p_patient_id, p_doctor_id, v_admin_id);
 END;
 $$ LANGUAGE plpgsql;
 
