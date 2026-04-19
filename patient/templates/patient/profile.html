@@ -27,6 +27,12 @@
     <p>View and update your information.</p>
 </div>
 
+{% if not profile_complete %}
+<div class="alert alert-error" style="margin-bottom:16px;">
+    Your profile is incomplete. Please fill in your date of birth to start booking appointments.
+</div>
+{% endif %}
+
 <div class="card">
     {% if profile %}
     <form method="POST">
@@ -52,11 +58,16 @@
         <div class="form-row">
             <div class="form-group">
                 <label>Date of Birth</label>
-                <input type="text" value="{{ profile.4 }}" disabled style="background:#f5f7fa;">
+                <input type="date" name="date_of_birth" value="{{ profile.4|date:'Y-m-d' }}" required>
             </div>
             <div class="form-group">
                 <label>Gender</label>
-                <input type="text" value="{{ profile.5|default:'' }}" disabled style="background:#f5f7fa;">
+                <select name="gender">
+                    <option value="">Select</option>
+                    <option value="Male" {% if profile.5 == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if profile.5 == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if profile.5 == 'Other' %}selected{% endif %}>Other</option>
+                </select>
             </div>
         </div>
         <div class="form-group">

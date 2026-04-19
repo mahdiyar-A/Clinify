@@ -10,11 +10,24 @@ from common.session import get_user_from_session
 from . import selectors, services
 
 
+def _profile_is_complete(profile):
+    # profile tuple: (first_name, last_name, email, phone, dob, gender,
+    # address, emergency_contact_name, emergency_contact_phone)
+    return bool(profile and profile[4])  # date_of_birth set
+
+
 @login_required_custom(role='patient')
 def patient_dashboard(request):
     user_id, _ = get_user_from_session(request)
     try:
         user = selectors.get_user_name(user_id)
+        profile = selectors.get_profile(user_id)
+        if not _profile_is_complete(profile):
+            messages.info(
+                request,
+                'Please complete your profile before booking appointments.',
+            )
+            return redirect('patient_profile')
         appointments = selectors.list_recent_appointments(user_id)
     except Exception as e:
         messages.error(request, f'Error: {e}')
@@ -34,6 +47,8 @@ def patient_profile(request):
             services.update_profile(
                 user_id,
                 request.POST.get('phone'),
+                request.POST.get('date_of_birth'),
+                request.POST.get('gender'),
                 request.POST.get('address'),
                 request.POST.get('emergency_contact_name'),
                 request.POST.get('emergency_contact_phone'),
@@ -47,12 +62,25 @@ def patient_profile(request):
     except Exception as e:
         messages.error(request, f'Error: {e}')
         profile = None
-    return render(request, 'patient/profile.html', {'profile': profile})
+    return render(request, 'patient/profile.html', {
+        'profile': profile,
+        'profile_complete': _profile_is_complete(profile),
+    })
 
 
 @login_required_custom(role='patient')
 def patient_appointments(request):
     user_id, _ = get_user_from_session(request)
+
+    try:
+        if not _profile_is_complete(selectors.get_profile(user_id)):
+            messages.info(
+                request,
+                'Please complete your profile before booking appointments.',
+            )
+            return redirect('patient_profile')
+    except Exception as e:
+        messages.error(request, f'Error: {e}')
 
     if request.method == 'POST':
         action = request.POST.get('action')
