@@ -78,3 +78,5 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+STAFF_EMAIL_DOMAINS = ['clinify.com']

@@ -3,6 +3,7 @@ import datetime
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
+from accounts.forms import AdminCreateForm
 from common.decorators import login_required_custom
 
 from . import selectors, services
@@ -81,6 +82,24 @@ def admin_users(request):
         messages.error(request, f'Error: {e}')
         users = []
     return render(request, 'clinic_admin/users.html', {'users': users})
+
+
+@login_required_custom(role='admin')
+def admin_create_admin(request):
+    form = AdminCreateForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        try:
+            services.create_admin(form.cleaned_data)
+            messages.success(
+                request,
+                f"Admin account created for {form.cleaned_data['email']}.",
+            )
+            return redirect('admin_create_admin')
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, f'Error: {e}')
+    return render(request, 'clinic_admin/create_admin.html', {'form': form})
 
 
 @login_required_custom(role='admin')

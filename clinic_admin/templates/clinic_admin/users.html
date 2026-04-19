@@ -16,6 +16,9 @@
 <a href="{% url 'admin_medications' %}" class="nav-link">
     <span class="icon">💊</span> Medications
 </a>
+<a href="{% url 'admin_create_admin' %}" class="nav-link">
+    <span class="icon">➕</span> Create Admin
+</a>
 {% endblock %}
 
 {% block content %}
@@ -89,7 +92,7 @@
             </div>
             <div class="form-group">
                 <label>Phone</label>
-                <input type="text" name="phone" id="edit-phone">
+                <input type="tel" name="phone" id="edit-phone" placeholder="(403) 000-0000">
             </div>
             <div class="form-group">
                 <label>Role</label>

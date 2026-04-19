@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect, render
 
 from . import selectors, services
-from .forms import LoginForm, RegisterForm
+from .forms import DoctorRegisterForm, LoginForm, PatientRegisterForm
 
 
 def login_view(request):
@@ -40,14 +40,39 @@ def logout_view(request):
 
 
 def register_view(request):
-    form = RegisterForm(request.POST or None)
+    """Role picker landing page."""
+    return render(request, 'accounts/register.html')
+
+
+def register_patient_view(request):
+    form = PatientRegisterForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         try:
             services.register_patient(form.cleaned_data)
-            messages.success(request, 'Account created successfully. Please log in.')
+            messages.success(
+                request,
+                'Account created. Please log in and complete your profile.',
+            )
             return redirect('login')
         except ValueError as e:
             messages.error(request, str(e))
         except Exception as e:
             messages.error(request, f'Error: {e}')
-    return render(request, 'accounts/register.html', {'form': form})
+    return render(request, 'accounts/register_patient.html', {'form': form})
+
+
+def register_doctor_view(request):
+    form = DoctorRegisterForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        try:
+            services.register_doctor(form.cleaned_data)
+            messages.success(
+                request,
+                'Doctor account created. Please log in and complete your profile.',
+            )
+            return redirect('login')
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, f'Error: {e}')
+    return render(request, 'accounts/register_doctor.html', {'form': form})
