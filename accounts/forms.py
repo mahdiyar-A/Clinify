@@ -50,11 +50,8 @@ class PatientRegisterForm(BaseRegisterForm):
 RegisterForm = PatientRegisterForm
 
 
-class DoctorRegisterForm(BaseRegisterForm):
-    license_number = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={'placeholder': 'Medical License Number'})
-    )
+class StaffEmailDomainMixin:
+    """Restrict the email field to STAFF_EMAIL_DOMAINS."""
 
     def clean_email(self):
         email = super().clean_email()
@@ -62,7 +59,18 @@ class DoctorRegisterForm(BaseRegisterForm):
         allowed = [d.lower() for d in settings.STAFF_EMAIL_DOMAINS]
         if domain not in allowed:
             raise forms.ValidationError(
-                'Doctor registration requires an email from: '
+                'Staff accounts require an email from: '
                 + ', '.join('@' + d for d in allowed)
             )
         return email
+
+
+class DoctorRegisterForm(StaffEmailDomainMixin, BaseRegisterForm):
+    license_number = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Medical License Number'})
+    )
+
+
+class AdminCreateForm(StaffEmailDomainMixin, BaseRegisterForm):
+    pass
