@@ -313,7 +313,56 @@ tbody td {
 
 tbody td.cell-wrap {
     overflow-wrap: anywhere;
-    min-width: 180px;
+}
+
+.truncate {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.day-table-wrap {
+    max-height: 480px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+.day-table-wrap thead th {
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    z-index: 1;
+}
+
+tr.appt-row { cursor: pointer; }
+tr.appt-row:hover { background: var(--bg); }
+
+.detail-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+.detail-row:last-of-type { border-bottom: none; }
+.detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted);
+    min-width: 80px;
+}
+.detail-reason {
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
 }
 
 tbody tr:last-child td { border-bottom: none; }
@@ -406,7 +455,7 @@ a { color: var(--primary); text-decoration: none; }
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 20px;
 }
-@media (max-width: 960px) {
+@media (max-width: 1200px) {
     .calendar-grid { grid-template-columns: 1fr; }
 }
 .calendar-card { padding: 20px; }

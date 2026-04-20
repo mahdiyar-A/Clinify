@@ -46,20 +46,24 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card day-card">
         <div class="card-title">{{ selected|date:"l, F j" }}</div>
         {% if selected_schedule %}
-        <div class="table-wrap">
+        <div class="table-wrap day-table-wrap">
             <table>
                 <thead>
                     <tr><th>Time</th><th>Patient</th><th>Reason</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody>
                     {% for s in selected_schedule %}
-                    <tr>
+                    <tr class="appt-row"
+                        data-time="{{ s.1|time:"g:i A" }}"
+                        data-patient="{{ s.4 }}"
+                        data-reason="{{ s.3 }}"
+                        data-status="{{ s.2 }}">
                         <td>{{ s.1|time:"g:i A" }}</td>
                         <td>{{ s.4 }}</td>
-                        <td class="cell-wrap">{{ s.3 }}</td>
+                        <td><div class="truncate" title="{{ s.3 }}">{{ s.3 }}</div></td>
                         <td><span class="badge badge-{{ s.2|lower }}">{{ s.2 }}</span></td>
                         <td><a href="{% url 'doctor_patient_record' patient_id=s.5 %}" class="btn btn-outline btn-sm">View Record</a></td>
                     </tr>
@@ -72,6 +76,41 @@
         {% endif %}
     </div>
 </div>
+
+<div class="modal-backdrop" id="appt-modal">
+    <div class="modal">
+        <h3>Appointment Details</h3>
+        <div class="detail-row"><span class="detail-label">Time</span><span id="appt-time"></span></div>
+        <div class="detail-row"><span class="detail-label">Patient</span><span id="appt-patient"></span></div>
+        <div class="detail-row"><span class="detail-label">Status</span><span id="appt-status"></span></div>
+        <div class="detail-row"><span class="detail-label">Reason</span><p id="appt-reason" class="detail-reason"></p></div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="closeApptModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openApptModal(row) {
+    document.getElementById('appt-time').textContent = row.dataset.time;
+    document.getElementById('appt-patient').textContent = row.dataset.patient;
+    document.getElementById('appt-status').textContent = row.dataset.status;
+    document.getElementById('appt-reason').textContent = row.dataset.reason || '—';
+    document.getElementById('appt-modal').classList.add('open');
+}
+function closeApptModal() {
+    document.getElementById('appt-modal').classList.remove('open');
+}
+document.querySelectorAll('.appt-row').forEach(function(row) {
+    row.addEventListener('click', function(e) {
+        if (e.target.closest('a,button')) return;
+        openApptModal(row);
+    });
+});
+document.getElementById('appt-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeApptModal();
+});
+</script>
 
 <div class="card" style="margin-top:20px;">
     <div class="card-title">Upcoming (next 14 days)</div>
