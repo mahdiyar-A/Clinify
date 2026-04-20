@@ -4,9 +4,9 @@ INSERT INTO "USER" (first_name, last_name, email, phone, password_hash, role) VA
 ('Alex',     'Johnson',  'alex.johnson@email.com',  '4031111111', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
 ('Sarah',    'Lee',      'sarah.lee@email.com',     '4032222222', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
 ('Michael',  'Brown',    'michael.brown@email.com', '4033333333', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
-('Rose',     'Smith',    'rose.smith@email.com',    '4034444444', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
-('James',    'Wilson',   'james.wilson@email.com',  '4035555555', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
-('Sara',     'Admin',    'sara.admin@email.com',    '4036666666', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'admin');
+('Rose',     'Smith',    'rose.smith@clinify.com',    '4034444444', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
+('James',    'Wilson',   'james.wilson@clinify.com',  '4035555555', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
+('Sara',     'Admin',    'sara.admin@clinify.com',    '4036666666', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'admin');
 
 INSERT INTO patient (patient_id, date_of_birth, gender, address, emergency_contact_name, emergency_contact_phone) VALUES
 (1, '1995-03-10', 'Male',   '123 Main St, Calgary',   'Mary Johnson', '4039991111'),
