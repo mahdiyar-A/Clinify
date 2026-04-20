@@ -9,20 +9,32 @@
 </head>
 <body>
 <div class="auth-wrap">
-    <div class="auth-card" style="max-width:460px;">
+    <div class="auth-card">
         <div class="logo">Clinify</div>
         <div class="tagline">Create an account</div>
 
-        <h2>I am a...</h2>
+        <h2>Choose your role</h2>
 
-        <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
-            <a href="{% url 'register_patient' %}" class="btn btn-primary btn-full">Patient</a>
-            <a href="{% url 'register_doctor' %}" class="btn btn-secondary btn-full">Doctor</a>
+        <div class="role-options">
+            <a href="{% url 'register_patient' %}" class="role-card">
+                <span class="role-text">
+                    <div class="role-title">Patient</div>
+                    <div class="role-desc">Book appointments and manage your medical record.</div>
+                </span>
+                <span class="role-arrow">&rarr;</span>
+            </a>
+            <a href="{% url 'register_doctor' %}" class="role-card">
+                <span class="role-text">
+                    <div class="role-title">Doctor</div>
+                    <div class="role-desc">Manage your schedule, patients, and prescriptions.</div>
+                </span>
+                <span class="role-arrow">&rarr;</span>
+            </a>
         </div>
 
-        <p style="font-size:12px; color:var(--muted); text-align:center; margin-top:16px;">
+        <div class="auth-note">
             Admin accounts are provisioned by an existing administrator.
-        </p>
+        </div>
 
         <hr class="divider">
         <p style="font-size:13px; color:var(--muted); text-align:center;">
