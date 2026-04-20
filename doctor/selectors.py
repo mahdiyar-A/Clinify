@@ -32,6 +32,23 @@ def get_schedule(doctor_id, date=None):
         return cur.fetchall()
 
 
+def list_appointments_in_range(doctor_id, start_date, end_date):
+    with db_cursor() as cur:
+        cur.execute(
+            '''SELECT a.appointment_date, a.appointment_time, a.status, a.reason,
+                      u.first_name || ' ' || u.last_name AS patient_name,
+                      a.patient_id
+               FROM appointment a
+               JOIN patient p ON a.patient_id = p.patient_id
+               JOIN "USER" u ON p.patient_id = u.user_id
+               WHERE a.doctor_id = %s
+                 AND a.appointment_date BETWEEN %s AND %s
+               ORDER BY a.appointment_date, a.appointment_time''',
+            (doctor_id, start_date, end_date),
+        )
+        return cur.fetchall()
+
+
 def list_availability(doctor_id):
     with db_cursor() as cur:
         cur.execute(

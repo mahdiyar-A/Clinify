@@ -1,3 +1,4 @@
+import calendar
 import datetime
 
 from django.contrib import messages
@@ -17,6 +18,8 @@ def _profile_is_complete(profile):
 @login_required_custom(role='doctor')
 def doctor_dashboard(request):
     user_id, _ = get_user_from_session(request)
+    today = datetime.date.today()
+
     try:
         if not _profile_is_complete(selectors.get_profile(user_id)):
             messages.info(
@@ -25,14 +28,71 @@ def doctor_dashboard(request):
             )
             return redirect('doctor_profile')
         user = selectors.get_user_name(user_id)
-        schedule = selectors.get_schedule(user_id)
+
+        month_str = request.GET.get('month') or today.strftime('%Y-%m')
+        try:
+            year, month = [int(x) for x in month_str.split('-')]
+            first_day = datetime.date(year, month, 1)
+        except (ValueError, TypeError):
+            first_day = today.replace(day=1)
+            year, month = first_day.year, first_day.month
+
+        if month == 12:
+            next_first = datetime.date(year + 1, 1, 1)
+        else:
+            next_first = datetime.date(year, month + 1, 1)
+        last_day = next_first - datetime.timedelta(days=1)
+        prev_first = (first_day - datetime.timedelta(days=1)).replace(day=1)
+
+        selected_str = request.GET.get('date') or today.strftime('%Y-%m-%d')
+        try:
+            selected = datetime.datetime.strptime(selected_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected = today
+
+        month_appts = selectors.list_appointments_in_range(user_id, first_day, last_day)
+        appt_days = {a[0] for a in month_appts}
+
+        cal = calendar.Calendar(firstweekday=6)
+        weeks = []
+        for week in cal.monthdatescalendar(year, month):
+            row = []
+            for d in week:
+                row.append({
+                    'date': d,
+                    'day': d.day,
+                    'iso': d.strftime('%Y-%m-%d'),
+                    'in_month': d.month == month,
+                    'is_today': d == today,
+                    'is_selected': d == selected,
+                    'has_appt': d in appt_days,
+                })
+            weeks.append(row)
+
+        selected_schedule = selectors.get_schedule(user_id, selected)
+
+        upcoming = selectors.list_appointments_in_range(
+            user_id, today, today + datetime.timedelta(days=14)
+        )
     except Exception as e:
         messages.error(request, f'Error: {e}')
-        user, schedule = None, []
+        return render(request, 'doctor/dashboard.html', {
+            'user': None, 'weeks': [], 'upcoming': [], 'selected_schedule': [],
+            'today': today, 'selected': today, 'month_label': today.strftime('%B %Y'),
+            'prev_month': '', 'next_month': '', 'current_month': today.strftime('%Y-%m'),
+        })
+
     return render(request, 'doctor/dashboard.html', {
         'user': user,
-        'schedule': schedule,
-        'today': datetime.date.today().strftime('%A, %B %d, %Y'),
+        'weeks': weeks,
+        'upcoming': upcoming,
+        'selected_schedule': selected_schedule,
+        'today': today,
+        'selected': selected,
+        'month_label': first_day.strftime('%B %Y'),
+        'prev_month': prev_first.strftime('%Y-%m'),
+        'next_month': next_first.strftime('%Y-%m'),
+        'current_month': first_day.strftime('%Y-%m'),
     })
 
 
@@ -59,18 +119,6 @@ def doctor_profile(request):
         'profile': profile,
         'profile_complete': _profile_is_complete(profile),
     })
-
-
-@login_required_custom(role='doctor')
-def doctor_schedule(request):
-    user_id, _ = get_user_from_session(request)
-    date = request.GET.get('date', '')
-    try:
-        schedule = selectors.get_schedule(user_id, date or None)
-    except Exception as e:
-        messages.error(request, f'Error: {e}')
-        schedule = []
-    return render(request, 'doctor/schedule.html', {'schedule': schedule, 'date': date})
 
 
 @login_required_custom(role='doctor')

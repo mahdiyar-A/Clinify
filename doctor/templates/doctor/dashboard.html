@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Calendar{% endblock %}
 {% block role_label %}Doctor Portal{% endblock %}
 
 {% block nav %}
 <span class="nav-label">Menu</span>
-<a href="{% url 'doctor_dashboard' %}" class="nav-link active"><span class="icon">⊞</span> Dashboard</a>
-<a href="{% url 'doctor_schedule' %}" class="nav-link"><span class="icon">📅</span> Schedule</a>
+<a href="{% url 'doctor_dashboard' %}" class="nav-link active"><span class="icon">📅</span> Calendar</a>
 <a href="{% url 'doctor_availability' %}" class="nav-link"><span class="icon">🕐</span> Availability</a>
 <a href="{% url 'doctor_prescriptions' %}" class="nav-link"><span class="icon">💊</span> Prescriptions</a>
 <a href="{% url 'doctor_profile' %}" class="nav-link"><span class="icon">👤</span> Profile</a>
@@ -14,35 +13,90 @@
 {% block content %}
 <div class="page-header">
     <h1>Welcome, Dr. {% if user %}{{ user.0 }} {{ user.1 }}{% endif %}</h1>
-    <p>{{ today }}</p>
+    <p>{{ today|date:"l, F j, Y" }}</p>
 </div>
 
-<div class="card">
-    <div class="card-title">Today's Schedule</div>
-    {% if schedule %}
+<div class="calendar-grid">
+    <div class="card calendar-card">
+        <div class="calendar-header">
+            <a href="?month={{ prev_month }}" class="btn btn-outline btn-sm">&larr;</a>
+            <div class="calendar-month">{{ month_label }}</div>
+            <a href="?month={{ next_month }}" class="btn btn-outline btn-sm">&rarr;</a>
+        </div>
+
+        <div class="calendar-weekdays">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+            <div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+
+        <div class="calendar-days">
+            {% for week in weeks %}
+                {% for day in week %}
+                <a href="?month={{ current_month }}&date={{ day.iso }}"
+                   class="cal-day
+                          {% if not day.in_month %}cal-muted{% endif %}
+                          {% if day.is_today %}cal-today{% endif %}
+                          {% if day.is_selected %}cal-selected{% endif %}
+                          {% if day.has_appt %}cal-has-appt{% endif %}">
+                    <span class="cal-num">{{ day.day }}</span>
+                    {% if day.has_appt %}<span class="cal-dot"></span>{% endif %}
+                </a>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">{{ selected|date:"l, F j" }}</div>
+        {% if selected_schedule %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Time</th><th>Patient</th><th>Reason</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for s in selected_schedule %}
+                    <tr>
+                        <td>{{ s.1|time:"H:i" }}</td>
+                        <td>{{ s.4 }}</td>
+                        <td>{{ s.3 }}</td>
+                        <td><span class="badge badge-{{ s.2|lower }}">{{ s.2 }}</span></td>
+                        <td><a href="{% url 'doctor_patient_record' patient_id=s.5 %}" class="btn btn-outline btn-sm">View Record</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty">No appointments for this day.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+    <div class="card-title">Upcoming (next 14 days)</div>
+    {% if upcoming %}
     <div class="table-wrap">
         <table>
             <thead>
-                <tr><th>Time</th><th>Patient</th><th>Reason</th><th>Status</th><th>Action</th></tr>
+                <tr><th>Date</th><th>Time</th><th>Patient</th><th>Reason</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
-                {% for s in schedule %}
+                {% for a in upcoming %}
                 <tr>
-                    <td>{{ s.1|time:"H:i" }}</td>
-                    <td>{{ s.4 }}</td>
-                    <td>{{ s.3 }}</td>
-                    <td><span class="badge badge-{{ s.2|lower }}">{{ s.2 }}</span></td>
-                    <td>
-                        {# s.5 = patient_id (added in updated stored procedure) #}
-                        <a href="{% url 'doctor_patient_record' patient_id=s.5 %}" class="btn btn-outline btn-sm">View Record</a>
-                    </td>
+                    <td>{{ a.0|date:"D, M j" }}</td>
+                    <td>{{ a.1|time:"H:i" }}</td>
+                    <td>{{ a.4 }}</td>
+                    <td>{{ a.3 }}</td>
+                    <td><span class="badge badge-{{ a.2|lower }}">{{ a.2 }}</span></td>
+                    <td><a href="{% url 'doctor_patient_record' patient_id=a.5 %}" class="btn btn-outline btn-sm">View Record</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-    <div class="empty">No appointments scheduled for today.</div>
+    <div class="empty">No upcoming appointments.</div>
     {% endif %}
 </div>
 {% endblock %}

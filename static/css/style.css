@@ -386,4 +386,74 @@ tbody tr:hover { background: var(--bg); }
 }
 
 a { color: var(--primary); text-decoration: none; }
+
+/* ── CALENDAR ───────────────────────────────────── */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+}
+@media (max-width: 960px) {
+    .calendar-grid { grid-template-columns: 1fr; }
+}
+.calendar-card { padding: 20px; }
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+.calendar-month {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+}
+.calendar-weekdays,
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.calendar-weekdays {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.cal-day {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background .12s, border-color .12s;
+}
+.cal-day:hover { background: var(--primary-lt); border-color: var(--primary); }
+.cal-num { line-height: 1; }
+.cal-muted { color: #c5ccd6; background: #fafbfc; }
+.cal-today { border-color: var(--primary); color: var(--primary); font-weight: 700; }
+.cal-selected {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+.cal-selected:hover { background: var(--primary); color: #fff; }
+.cal-dot {
+    position: absolute;
+    bottom: 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+.cal-selected .cal-dot { background: #fff; }
 a:hover { text-decoration: underline; }
