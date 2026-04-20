@@ -13,13 +13,18 @@
 {% block content %}
 <div class="page-header">
     <h1>Prescriptions</h1>
+    {% if selected_visit_id %}
+    <p><a href="{% url 'doctor_appointment' appointment_id=selected_visit_id %}">&larr; Back to appointment</a></p>
+    {% else %}
     <p>Create and manage prescriptions.</p>
+    {% endif %}
 </div>
 
 <div class="card">
     <div class="card-title">New Prescription</div>
     <form method="POST">
         {% csrf_token %}
+        {% if selected_visit_id %}<input type="hidden" name="return_to_appointment" value="1">{% endif %}
         <div class="form-group">
             <label>Visit</label>
             <select name="visit_id" required>

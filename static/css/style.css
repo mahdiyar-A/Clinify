@@ -311,7 +311,7 @@ tbody td {
     vertical-align: top;
 }
 
-tbody td.cell-wrap {
+.cell-wrap {
     overflow-wrap: anywhere;
 }
 

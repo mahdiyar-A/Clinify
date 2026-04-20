@@ -159,41 +159,72 @@ def doctor_availability(request):
 def doctor_patient_record(request, patient_id):
     user_id, _ = get_user_from_session(request)
 
-    if request.method == 'POST' and request.POST.get('action') == 'record_visit':
-        appointment_id = request.POST.get('appointment_id')
-        try:
-            services.record_visit(
-                user_id,
-                patient_id,
-                appointment_id,
-                request.POST.get('diagnosis'),
-                request.POST.get('vitals'),
-                request.POST.get('notes'),
-            )
-            messages.success(request, 'Visit recorded. You can now create a prescription.')
-            return redirect(f'/doctor/prescriptions/?visit_id={appointment_id}')
-        except ValueError as e:
-            messages.error(request, str(e))
-        except Exception as e:
-            messages.error(request, f'Error: {e}')
-        return redirect('doctor_patient_record', patient_id=patient_id)
-
     try:
         if not selectors.doctor_treats_patient(user_id, patient_id):
             messages.error(request, 'You do not have access to this patient record.')
             return redirect('doctor_dashboard')
         patient = selectors.get_patient_details(patient_id)
         visits = selectors.list_patient_visits(patient_id)
-        pending_appointments = selectors.list_pending_appointments(patient_id, user_id)
     except Exception as e:
         messages.error(request, f'Error: {e}')
-        patient, visits, pending_appointments = None, [], []
+        patient, visits = None, []
 
     return render(request, 'doctor/patient_record.html', {
         'patient': patient,
         'visits': visits,
         'patient_id': patient_id,
-        'pending_appointments': pending_appointments,
+        'from_appointment': request.GET.get('from'),
+    })
+
+
+@login_required_custom(role='doctor')
+def doctor_appointment(request, appointment_id):
+    user_id, _ = get_user_from_session(request)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        try:
+            if action == 'record_visit':
+                patient_id = request.POST.get('patient_id')
+                services.record_visit(
+                    user_id,
+                    patient_id,
+                    appointment_id,
+                    request.POST.get('diagnosis'),
+                    request.POST.get('vitals'),
+                    request.POST.get('notes'),
+                )
+                messages.success(request, 'Visit recorded.')
+            elif action == 'cancel':
+                services.cancel_appointment(user_id, appointment_id)
+                messages.success(request, 'Appointment cancelled.')
+            elif action == 'no_show':
+                services.mark_no_show(user_id, appointment_id)
+                messages.success(request, 'Appointment marked as no-show.')
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, f'Error: {e}')
+        return redirect('doctor_appointment', appointment_id=appointment_id)
+
+    try:
+        appointment = selectors.get_appointment(user_id, appointment_id)
+        if not appointment:
+            messages.error(request, 'Appointment not found.')
+            return redirect('doctor_dashboard')
+        patient_id = appointment[5]
+        last_visit = selectors.get_last_visit(patient_id)
+        visit = selectors.get_visit_by_appointment(appointment_id)
+        prescription = selectors.get_prescription_for_visit(user_id, appointment_id) if visit else None
+    except Exception as e:
+        messages.error(request, f'Error: {e}')
+        return redirect('doctor_dashboard')
+
+    return render(request, 'doctor/appointment.html', {
+        'appointment': appointment,
+        'last_visit': last_visit,
+        'visit': visit,
+        'prescription': prescription,
     })
 
 
@@ -203,15 +234,19 @@ def doctor_prescriptions(request):
     selected_visit_id = request.GET.get('visit_id', '')
 
     if request.method == 'POST':
+        visit_id = request.POST.get('visit_id')
+        return_to_appointment = request.POST.get('return_to_appointment')
         try:
             services.create_prescription(
                 user_id,
-                request.POST.get('visit_id'),
+                visit_id,
                 request.POST.getlist('medication_id'),
                 request.POST.getlist('frequency'),
                 request.POST.getlist('duration'),
             )
             messages.success(request, 'Prescription created.')
+            if return_to_appointment and visit_id:
+                return redirect('doctor_appointment', appointment_id=visit_id)
         except Exception as e:
             messages.error(request, f'Error: {e}')
         return redirect('doctor_prescriptions')

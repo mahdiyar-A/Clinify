@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Appointment{% endblock %}
+{% block role_label %}Doctor Portal{% endblock %}
+
+{% block nav %}
+<span class="nav-label">Menu</span>
+<a href="{% url 'doctor_dashboard' %}" class="nav-link"><span class="icon">📅</span> Calendar</a>
+<a href="{% url 'doctor_availability' %}" class="nav-link"><span class="icon">🕐</span> Availability</a>
+<a href="{% url 'doctor_prescriptions' %}" class="nav-link"><span class="icon">💊</span> Prescriptions</a>
+<a href="{% url 'doctor_profile' %}" class="nav-link"><span class="icon">👤</span> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Appointment</h1>
+    <p><a href="{% url 'doctor_dashboard' %}">&larr; Back to calendar</a></p>
+</div>
+
+{% if appointment %}
+<div class="card">
+    <div class="card-title">Details</div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+        <div>
+            <div style="font-size:12px;color:var(--muted);">DATE</div>
+            <div>{{ appointment.1|date:"l, F j, Y" }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">TIME</div>
+            <div>{{ appointment.2|time:"g:i A" }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">STATUS</div>
+            <div><span class="badge badge-{{ appointment.3|lower }}">{{ appointment.3 }}</span></div>
+        </div>
+        <div style="grid-column: span 3;">
+            <div style="font-size:12px;color:var(--muted);">REASON</div>
+            <div class="cell-wrap">{{ appointment.4|default:"—" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Patient</div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+        <div>
+            <div style="font-size:12px;color:var(--muted);">NAME</div>
+            <div>{{ appointment.6 }} {{ appointment.7 }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">DATE OF BIRTH</div>
+            <div>{{ appointment.8|date:"M d, Y" }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">GENDER</div>
+            <div>{{ appointment.9 }}</div>
+        </div>
+        {% if last_visit and not visit %}
+        <div style="grid-column: span 3;">
+            <div style="font-size:12px;color:var(--muted);">LAST VISIT</div>
+            <div class="cell-wrap">{{ last_visit.0|date:"M d, Y" }} — {{ last_visit.1|default:"No diagnosis recorded" }}</div>
+        </div>
+        {% endif %}
+    </div>
+    <div style="margin-top:16px;">
+        <a href="{% url 'doctor_patient_record' patient_id=appointment.5 %}?from={{ appointment.0 }}" class="btn btn-outline">View Full Record</a>
+    </div>
+</div>
+
+{% if visit %}
+<div class="card">
+    <div class="card-title">Visit Summary</div>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px;">
+        <div>
+            <div style="font-size:12px;color:var(--muted);">VISIT DATE</div>
+            <div>{{ visit.0|date:"M d, Y" }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">DIAGNOSIS</div>
+            <div class="cell-wrap">{{ visit.1|default:"—" }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">VITALS</div>
+            <div class="cell-wrap">{{ visit.2|default:"—" }}</div>
+        </div>
+        <div>
+            <div style="font-size:12px;color:var(--muted);">NOTES</div>
+            <div class="cell-wrap">{{ visit.3|default:"—" }}</div>
+        </div>
+    </div>
+    <div style="margin-top:16px;">
+        {% if prescription %}
+        <a href="{% url 'doctor_prescriptions' %}" class="btn btn-outline">Prescription Issued &rarr;</a>
+        {% else %}
+        <a href="{% url 'doctor_prescriptions' %}?visit_id={{ appointment.0 }}" class="btn btn-success">Issue Prescription</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if appointment.3 == 'Scheduled' %}
+<div class="card">
+    <div class="card-title">Record Visit</div>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="record_visit">
+        <input type="hidden" name="patient_id" value="{{ appointment.5 }}">
+        <div class="form-group">
+            <label>Diagnosis</label>
+            <input type="text" name="diagnosis" placeholder="e.g. Mild cold">
+        </div>
+        <div class="form-group">
+            <label>Vitals</label>
+            <input type="text" name="vitals" placeholder="e.g. BP 120/80, Temp 37C">
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" rows="3" placeholder="Additional notes..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Save Visit</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-title">Other Actions</div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-outline" onclick="openConfirm('no_show')">Mark No-Show</button>
+        <button type="button" class="btn btn-danger" onclick="openConfirm('cancel')">Cancel Appointment</button>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="confirm-modal">
+    <div class="modal">
+        <h3 id="confirm-title">Confirm</h3>
+        <p id="confirm-body" style="color:var(--muted); margin:0;"></p>
+        <form method="POST" id="confirm-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" id="confirm-action">
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeConfirm()">Back</button>
+                <button type="submit" class="btn btn-danger" id="confirm-submit">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const CONFIRM_COPY = {
+    no_show: {
+        title: 'Mark as No-Show?',
+        body: 'The patient did not attend this appointment. This cannot be undone.',
+        submit: 'Mark No-Show',
+        submitClass: 'btn btn-outline',
+    },
+    cancel: {
+        title: 'Cancel Appointment?',
+        body: 'The appointment will be cancelled and the patient will be notified. This cannot be undone.',
+        submit: 'Cancel Appointment',
+        submitClass: 'btn btn-danger',
+    },
+};
+function openConfirm(action) {
+    const copy = CONFIRM_COPY[action];
+    document.getElementById('confirm-title').textContent = copy.title;
+    document.getElementById('confirm-body').textContent = copy.body;
+    document.getElementById('confirm-action').value = action;
+    const btn = document.getElementById('confirm-submit');
+    btn.textContent = copy.submit;
+    btn.className = copy.submitClass;
+    document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm() {
+    document.getElementById('confirm-modal').classList.remove('open');
+}
+document.getElementById('confirm-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+});
+</script>
+{% endif %}
+{% endif %}
+{% endblock %}

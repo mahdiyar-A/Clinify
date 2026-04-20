@@ -37,7 +37,7 @@ def list_appointments_in_range(doctor_id, start_date, end_date):
         cur.execute(
             '''SELECT a.appointment_date, a.appointment_time, a.status, a.reason,
                       u.first_name || ' ' || u.last_name AS patient_name,
-                      a.patient_id
+                      a.patient_id, a.appointment_id
                FROM appointment a
                JOIN patient p ON a.patient_id = p.patient_id
                JOIN "USER" u ON p.patient_id = u.user_id
@@ -47,6 +47,52 @@ def list_appointments_in_range(doctor_id, start_date, end_date):
             (doctor_id, start_date, end_date),
         )
         return cur.fetchall()
+
+
+def get_appointment(doctor_id, appointment_id):
+    with db_cursor() as cur:
+        cur.execute(
+            '''SELECT a.appointment_id, a.appointment_date, a.appointment_time,
+                      a.status, a.reason, a.patient_id,
+                      u.first_name, u.last_name,
+                      p.date_of_birth, p.gender
+               FROM appointment a
+               JOIN patient p ON a.patient_id = p.patient_id
+               JOIN "USER" u ON p.patient_id = u.user_id
+               WHERE a.appointment_id = %s AND a.doctor_id = %s''',
+            (appointment_id, doctor_id),
+        )
+        return cur.fetchone()
+
+
+def get_visit_by_appointment(appointment_id):
+    with db_cursor() as cur:
+        cur.execute(
+            '''SELECT visit_date, diagnosis, vitals, visit_notes
+               FROM visit WHERE appointment_id = %s''',
+            (appointment_id,),
+        )
+        return cur.fetchone()
+
+
+def get_prescription_for_visit(doctor_id, visit_id):
+    with db_cursor() as cur:
+        cur.execute(
+            '''SELECT prescription_id FROM prescription
+               WHERE visit_id = %s AND doctor_id = %s LIMIT 1''',
+            (visit_id, doctor_id),
+        )
+        return cur.fetchone()
+
+
+def get_last_visit(patient_id):
+    with db_cursor() as cur:
+        cur.execute(
+            '''SELECT visit_date, diagnosis FROM visit
+               WHERE patient_id = %s ORDER BY visit_date DESC LIMIT 1''',
+            (patient_id,),
+        )
+        return cur.fetchone()
 
 
 def list_availability(doctor_id):

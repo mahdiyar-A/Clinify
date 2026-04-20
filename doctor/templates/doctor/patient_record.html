@@ -14,6 +14,11 @@
 {% block content %}
 <div class="page-header">
     <h1>Patient Record</h1>
+    {% if from_appointment %}
+    <p><a href="{% url 'doctor_appointment' appointment_id=from_appointment %}">&larr; Back to appointment</a></p>
+    {% else %}
+    <p><a href="{% url 'doctor_dashboard' %}">&larr; Back to calendar</a></p>
+    {% endif %}
 </div>
 
 {% if patient %}
@@ -47,40 +52,6 @@
     </div>
 </div>
 {% endif %}
-
-<div class="card">
-    <div class="card-title">Record Visit</div>
-    {% if pending_appointments %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="record_visit">
-        <div class="form-group">
-            <label>Appointment</label>
-            <select name="appointment_id" required>
-                <option value="">Select appointment</option>
-                {% for a in pending_appointments %}
-                <option value="{{ a.0 }}">{{ a.1|date:"M d, Y" }} at {{ a.2|time:"g:i A" }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Diagnosis</label>
-            <input type="text" name="diagnosis" placeholder="e.g. Mild cold">
-        </div>
-        <div class="form-group">
-            <label>Vitals</label>
-            <input type="text" name="vitals" placeholder="e.g. BP 120/80, Temp 37C">
-        </div>
-        <div class="form-group">
-            <label>Notes</label>
-            <textarea name="notes" rows="3" placeholder="Additional notes..."></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Save Visit</button>
-    </form>
-    {% else %}
-    <div class="empty">No scheduled appointments for this patient.</div>
-    {% endif %}
-</div>
 
 <div class="card">
     <div class="card-title">Visit History</div>

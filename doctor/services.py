@@ -51,6 +51,31 @@ def record_visit(doctor_id, patient_id, appointment_id, diagnosis, vitals, notes
         )
 
 
+def _assert_doctor_owns_appointment(cur, doctor_id, appointment_id, require_scheduled=True):
+    sql = 'SELECT 1 FROM appointment WHERE appointment_id = %s AND doctor_id = %s'
+    params = [appointment_id, doctor_id]
+    if require_scheduled:
+        sql += " AND status = 'Scheduled'"
+    cur.execute(sql, params)
+    if not cur.fetchone():
+        raise ValueError('Appointment not found or not actionable.')
+
+
+def cancel_appointment(doctor_id, appointment_id):
+    with db_cursor(commit=True) as cur:
+        _assert_doctor_owns_appointment(cur, doctor_id, appointment_id)
+        cur.execute('SELECT cancel_appointment(%s)', (int(appointment_id),))
+
+
+def mark_no_show(doctor_id, appointment_id):
+    with db_cursor(commit=True) as cur:
+        _assert_doctor_owns_appointment(cur, doctor_id, appointment_id)
+        cur.execute(
+            "UPDATE appointment SET status = 'No-Show' WHERE appointment_id = %s",
+            (int(appointment_id),),
+        )
+
+
 def create_prescription(doctor_id, visit_id, medication_ids, frequencies, durations):
     with db_cursor(commit=True) as cur:
         cur.execute('SELECT create_prescription(%s, %s)', (visit_id, doctor_id))
