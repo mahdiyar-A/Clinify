@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Availability{% endblock %}
 {% block role_label %}Doctor Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/availability.css' %}">
+{% endblock %}
 
 {% block nav %}
 <span class="nav-label">Menu</span>
@@ -12,72 +18,381 @@
 
 {% block content %}
 <div class="page-header">
-    <h1>Manage Availability</h1>
-    <p>Set the days and times you are available for appointments.</p>
+    <h1>Availability</h1>
+    <p>Set your weekly hours. Add a schedule change when a specific day differs.</p>
 </div>
 
-<div class="card">
-    <div class="card-title">Add Availability</div>
-    <form method="POST">
+<div class="card avail-card">
+    <div class="card-title">
+        <i data-lucide="repeat" class="title-icon"></i>
+        Weekly Schedule
+    </div>
+
+    <form method="POST" class="avail-composer" id="weekly-form" novalidate>
         {% csrf_token %}
         <input type="hidden" name="action" value="add">
-        <div class="form-row">
-            <div class="form-group">
-                <label>Day</label>
-                <select name="day_of_week" required>
-                    <option value="">Select day</option>
-                    <option>Monday</option>
-                    <option>Tuesday</option>
-                    <option>Wednesday</option>
-                    <option>Thursday</option>
-                    <option>Friday</option>
-                    <option>Saturday</option>
-                    <option>Sunday</option>
-                </select>
+        <div class="composer-row">
+            <div class="composer-days">
+                <div class="day-chip-group" id="day-chip-group">
+                    {% for d in days %}
+                    <label class="day-chip">
+                        <input type="checkbox" name="days" value="{{ d }}">
+                        <span>{{ d|slice:":3" }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="day-chip-presets">
+                    <button type="button" class="link-btn" data-days-preset="weekdays">Weekdays</button>
+                    <button type="button" class="link-btn" data-days-preset="weekends">Weekend</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Start Time</label>
-                <input type="time" name="start_time" required>
+            <div class="composer-hours">
+                <div class="time-range">
+                    <div class="timepicker" data-timepicker>
+                        <input type="hidden" name="start_time" id="weekly-start" required>
+                        <button type="button" class="timepicker-btn" data-tp-trigger>
+                            <span data-tp-display>Start</span>
+                            <i data-lucide="clock" class="timepicker-icon"></i>
+                        </button>
+                    </div>
+                    <span class="time-range-sep">to</span>
+                    <div class="timepicker" data-timepicker>
+                        <input type="hidden" name="end_time" id="weekly-end" required>
+                        <button type="button" class="timepicker-btn" data-tp-trigger>
+                            <span data-tp-display>End</span>
+                            <i data-lucide="clock" class="timepicker-icon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="field-hint" id="weekly-hint" aria-live="polite"></div>
             </div>
-            <div class="form-group">
-                <label>End Time</label>
-                <input type="time" name="end_time" required>
+            <button type="submit" class="btn btn-primary composer-submit" id="weekly-submit">
+                <i data-lucide="plus"></i> Add
+            </button>
+        </div>
+    </form>
+
+    <div class="weekly-list">
+        {% for row in weekly %}
+        <div class="weekly-row {% if not row.slots %}weekly-row--empty{% endif %}">
+            <div class="weekly-row-day">{{ row.day }}</div>
+            <div class="weekly-row-slots">
+                {% for slot in row.slots %}
+                <form method="POST" class="slot-chip-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="day_of_week" value="{{ row.day }}">
+                    <input type="hidden" name="start_time" value="{{ slot.start|time:'H:i' }}">
+                    <span class="slot-chip">
+                        <span class="slot-chip-time">
+                            <span class="t-start">{{ slot.start|time:"g:iA" }}</span>
+                            <span class="t-sep">–</span>
+                            <span class="t-end">{{ slot.end|time:"g:iA" }}</span>
+                        </span>
+                        <button type="submit" class="slot-chip-remove" title="Remove slot" aria-label="Remove slot">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </span>
+                </form>
+                {% empty %}
+                <span class="slot-empty">Not available</span>
+                {% endfor %}
             </div>
         </div>
-        <button type="submit" class="btn btn-success">Add</button>
-    </form>
+        {% endfor %}
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-title">Current Availability</div>
-    {% if availability %}
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr><th>Day</th><th>Start</th><th>End</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                {% for a in availability %}
-                <tr>
-                    <td>{{ a.0 }}</td>
-                    <td>{{ a.1|time:"g:i A" }}</td>
-                    <td>{{ a.2|time:"g:i A" }}</td>
-                    <td>
-                        <form method="POST">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="day_of_week" value="{{ a.0 }}">
-                            <input type="hidden" name="start_time" value="{{ a.1|time:'H:i' }}">
-                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="card avail-card">
+    <div class="card-title">
+        <i data-lucide="calendar-clock" class="title-icon"></i>
+        Schedule Changes
+        <button type="button" class="btn btn-ghost btn-sm card-title-action" id="toggle-exception">
+            <i data-lucide="plus"></i> Add a change
+        </button>
     </div>
+
+    <form method="POST" class="avail-composer exception-composer" id="exception-form" novalidate {% if exceptions %}hidden{% endif %}>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_exception">
+        <input type="hidden" name="mode" id="ex-mode" value="block">
+        <div class="composer-row">
+            <div class="form-group composer-date">
+                <label>Date</label>
+                <input type="date" name="exception_date" id="exception-date" min="{{ today_iso }}" required>
+            </div>
+            <div class="form-group composer-hours">
+                <label>Hours <span class="form-optional">(empty = blocked)</span></label>
+                <div class="time-range">
+                    <div class="timepicker" data-timepicker>
+                        <input type="hidden" name="ex_start_time" id="ex-start">
+                        <button type="button" class="timepicker-btn" data-tp-trigger>
+                            <span data-tp-display>Start</span>
+                            <i data-lucide="clock" class="timepicker-icon"></i>
+                        </button>
+                    </div>
+                    <span class="time-range-sep">to</span>
+                    <div class="timepicker" data-timepicker>
+                        <input type="hidden" name="ex_end_time" id="ex-end">
+                        <button type="button" class="timepicker-btn" data-tp-trigger>
+                            <span data-tp-display>End</span>
+                            <i data-lucide="clock" class="timepicker-icon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="field-hint" id="ex-hint" aria-live="polite"></div>
+            </div>
+            <div class="form-group composer-reason">
+                <label>Reason <span class="form-optional">(optional)</span></label>
+                <input type="text" name="reason" maxlength="200" placeholder="e.g. Conference">
+            </div>
+            <button type="submit" class="btn btn-primary composer-submit" id="exception-submit">
+                <i data-lucide="save"></i> Save
+            </button>
+        </div>
+    </form>
+
+    {% if exceptions %}
+    <ul class="exception-list">
+        {% for ex in exceptions %}
+        <li class="exception-item">
+            <div class="exception-info">
+                <div class="exception-date">{{ ex.1|date:"D, M j, Y" }}</div>
+                <div class="exception-meta">
+                    {% if ex.2 %}
+                    <span class="badge badge-cancelled">Blocked</span>
+                    {% else %}
+                    <span class="badge badge-scheduled">{{ ex.3|time:"g:i A" }} – {{ ex.4|time:"g:i A" }}</span>
+                    {% endif %}
+                    {% if ex.5 %}<span class="exception-reason">{{ ex.5 }}</span>{% endif %}
+                </div>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_exception">
+                <input type="hidden" name="exception_id" value="{{ ex.0 }}">
+                <button type="submit" class="btn-icon" title="Remove exception" aria-label="Remove exception">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
     {% else %}
-    <div class="empty">No availability set yet.</div>
+    <div class="empty-inline">Nothing scheduled yet — your weekly hours apply every day.</div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    // ---- Day-chip presets ----
+    var chipInputs = document.querySelectorAll('#day-chip-group input[type=checkbox]');
+    var weekdays = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+    var weekends = ['Saturday','Sunday'];
+    document.querySelectorAll('[data-days-preset]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var preset = btn.getAttribute('data-days-preset');
+            var set = preset === 'weekdays' ? weekdays : weekends;
+            chipInputs.forEach(function (cb) { cb.checked = set.indexOf(cb.value) !== -1; });
+        });
+    });
+
+    // ---- Time helpers ----
+    function parseTime(v) {
+        if (!v) return null;
+        var p = v.split(':');
+        return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+    }
+    function fmtDisplay(v) {
+        if (!v) return '';
+        var p = v.split(':');
+        var h = parseInt(p[0], 10), m = p[1];
+        var period = h >= 12 ? 'PM' : 'AM';
+        var h12 = h % 12 || 12;
+        return h12 + ':' + m + ' ' + period;
+    }
+    function to24h(h12, min, period) {
+        var h = h12 % 12;
+        if (period === 'PM') h += 12;
+        return (h < 10 ? '0' : '') + h + ':' + (min < 10 ? '0' : '') + min;
+    }
+
+    // ---- Custom time picker popover ----
+    var openPop = null;
+    function initTimePicker(root) {
+        var input = root.querySelector('input[type=hidden]');
+        var trigger = root.querySelector('[data-tp-trigger]');
+        var display = root.querySelector('[data-tp-display]');
+
+        var pop = document.createElement('div');
+        pop.className = 'timepicker-pop';
+        pop.hidden = true;
+        pop.innerHTML =
+            '<div class="tp-col"><div class="tp-col-label">Hour</div><div class="tp-col-grid tp-hours"></div></div>' +
+            '<div class="tp-col"><div class="tp-col-label">Min</div><div class="tp-col-grid tp-minutes"></div></div>' +
+            '<div class="tp-col"><div class="tp-col-label">&nbsp;</div><div class="tp-col-grid tp-period"></div></div>';
+        root.appendChild(pop);
+
+        var hoursGrid = pop.querySelector('.tp-hours');
+        var minsGrid = pop.querySelector('.tp-minutes');
+        var periodGrid = pop.querySelector('.tp-period');
+
+        function makeBtn(grid, label, value, key) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tp-cell';
+            b.textContent = label;
+            b.dataset[key] = value;
+            grid.appendChild(b);
+            return b;
+        }
+        for (var h = 1; h <= 12; h++) makeBtn(hoursGrid, String(h), h, 'hour');
+        [0, 15, 30, 45].forEach(function (m) {
+            makeBtn(minsGrid, (m < 10 ? '0' : '') + m, m, 'min');
+        });
+        ['AM', 'PM'].forEach(function (p) { makeBtn(periodGrid, p, p, 'period'); });
+
+        var state = { hour: null, min: null, period: null };
+
+        function highlight() {
+            hoursGrid.querySelectorAll('.tp-cell').forEach(function (b) {
+                b.classList.toggle('is-active', Number(b.dataset.hour) === state.hour);
+            });
+            minsGrid.querySelectorAll('.tp-cell').forEach(function (b) {
+                b.classList.toggle('is-active', Number(b.dataset.min) === state.min);
+            });
+            periodGrid.querySelectorAll('.tp-cell').forEach(function (b) {
+                b.classList.toggle('is-active', b.dataset.period === state.period);
+            });
+        }
+
+        function commit() {
+            if (state.hour == null || state.min == null || state.period == null) return;
+            var v = to24h(state.hour, state.min, state.period);
+            input.value = v;
+            display.textContent = fmtDisplay(v);
+            trigger.classList.add('has-value');
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function loadFromInput() {
+            if (!input.value) { state = { hour: null, min: null, period: null }; highlight(); return; }
+            var p = input.value.split(':');
+            var h24 = parseInt(p[0], 10);
+            state.min = parseInt(p[1], 10);
+            state.period = h24 >= 12 ? 'PM' : 'AM';
+            state.hour = h24 % 12 || 12;
+            display.textContent = fmtDisplay(input.value);
+            trigger.classList.add('has-value');
+            highlight();
+        }
+
+        hoursGrid.addEventListener('click', function (e) {
+            var b = e.target.closest('.tp-cell'); if (!b) return;
+            state.hour = Number(b.dataset.hour);
+            if (state.min == null) state.min = 0;
+            if (state.period == null) state.period = 'AM';
+            highlight(); commit();
+        });
+        minsGrid.addEventListener('click', function (e) {
+            var b = e.target.closest('.tp-cell'); if (!b) return;
+            state.min = Number(b.dataset.min);
+            highlight(); commit();
+        });
+        periodGrid.addEventListener('click', function (e) {
+            var b = e.target.closest('.tp-cell'); if (!b) return;
+            state.period = b.dataset.period;
+            highlight(); commit();
+        });
+
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (openPop && openPop !== pop) { openPop.hidden = true; }
+            pop.hidden = !pop.hidden;
+            openPop = pop.hidden ? null : pop;
+            loadFromInput();
+        });
+
+        loadFromInput();
+    }
+
+    document.querySelectorAll('[data-timepicker]').forEach(initTimePicker);
+    document.addEventListener('click', function (e) {
+        if (!openPop) return;
+        if (!e.target.closest('.timepicker')) { openPop.hidden = true; openPop = null; }
+    });
+
+    // ---- Range validation ----
+    function addHour(v) {
+        if (!v) return '';
+        var mins = Math.min(parseTime(v) + 60, 23 * 60 + 59);
+        var h = Math.floor(mins / 60), m = mins % 60;
+        return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+    }
+    function wireRange(startEl, endEl, hintEl, submitEl) {
+        function update() {
+            var s = parseTime(startEl.value), e = parseTime(endEl.value);
+            if (s !== null && e !== null && e <= s) {
+                hintEl.textContent = 'End time must be after start time.';
+                hintEl.classList.add('field-hint--error');
+                submitEl.disabled = true;
+            } else {
+                hintEl.textContent = '';
+                hintEl.classList.remove('field-hint--error');
+                submitEl.disabled = false;
+            }
+        }
+        startEl.addEventListener('change', function () {
+            if (startEl.value && !endEl.value) {
+                endEl.value = addHour(startEl.value);
+                var endTp = endEl.closest('[data-timepicker]');
+                if (endTp) {
+                    endTp.querySelector('[data-tp-display]').textContent = fmtDisplay(endEl.value);
+                    endTp.querySelector('[data-tp-trigger]').classList.add('has-value');
+                }
+            }
+            update();
+        });
+        endEl.addEventListener('change', update);
+        return update;
+    }
+
+    wireRange(
+        document.getElementById('weekly-start'),
+        document.getElementById('weekly-end'),
+        document.getElementById('weekly-hint'),
+        document.getElementById('weekly-submit')
+    );
+
+    var exStart = document.getElementById('ex-start');
+    var exEnd = document.getElementById('ex-end');
+    var exMode = document.getElementById('ex-mode');
+    var updateEx = wireRange(
+        exStart, exEnd,
+        document.getElementById('ex-hint'),
+        document.getElementById('exception-submit')
+    );
+    function syncMode() {
+        exMode.value = (exStart.value || exEnd.value) ? 'custom' : 'block';
+        updateEx();
+    }
+    exStart.addEventListener('change', syncMode);
+    exEnd.addEventListener('change', syncMode);
+    syncMode();
+
+    // ---- Exception form toggle ----
+    var exForm = document.getElementById('exception-form');
+    var exToggle = document.getElementById('toggle-exception');
+    if (exToggle && exForm) {
+        exToggle.addEventListener('click', function () {
+            exForm.hidden = !exForm.hidden;
+            if (!exForm.hidden) {
+                document.getElementById('exception-date').focus();
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

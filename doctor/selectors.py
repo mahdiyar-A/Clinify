@@ -104,9 +104,32 @@ def list_availability(doctor_id):
                    WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3
                    WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6
                    WHEN 'Sunday' THEN 7
-               END''',
+               END, start_time''',
             (doctor_id,),
         )
+        return cur.fetchall()
+
+
+def list_exceptions(doctor_id, from_date=None):
+    with db_cursor() as cur:
+        if from_date is not None:
+            cur.execute(
+                '''SELECT exception_id, exception_date, is_blocked,
+                          start_time, end_time, reason
+                   FROM availability_exception
+                   WHERE doctor_id = %s AND exception_date >= %s
+                   ORDER BY exception_date''',
+                (doctor_id, from_date),
+            )
+        else:
+            cur.execute(
+                '''SELECT exception_id, exception_date, is_blocked,
+                          start_time, end_time, reason
+                   FROM availability_exception
+                   WHERE doctor_id = %s
+                   ORDER BY exception_date''',
+                (doctor_id,),
+            )
         return cur.fetchall()
 
 

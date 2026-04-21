@@ -33,8 +33,20 @@
     function buildTimeOptions(doctorId, dateStr, selectEl) {
         selectEl.innerHTML = '<option value="">Select a time</option>';
         if (!doctorId || !dateStr || !availabilityData[doctorId]) return;
-        var dayName = DAYS[new Date(dateStr + 'T00:00:00').getDay()];
-        var slots = availabilityData[doctorId].filter(function (s) { return s.day === dayName; });
+        var doctorData = availabilityData[doctorId];
+        var exceptions = doctorData.exceptions || {};
+        var exception = exceptions[dateStr];
+        var slots;
+        if (exception) {
+            if (exception.is_blocked) {
+                selectEl.innerHTML = '<option value="">Doctor is unavailable on this date</option>';
+                return;
+            }
+            slots = [{ start: exception.start, end: exception.end }];
+        } else {
+            var dayName = DAYS[new Date(dateStr + 'T00:00:00').getDay()];
+            slots = (doctorData.slots || []).filter(function (s) { return s.day === dayName; });
+        }
         if (slots.length === 0) {
             selectEl.innerHTML = '<option value="">Doctor not available on this date</option>';
             return;
@@ -62,17 +74,24 @@
 
     doctorSelect.addEventListener('change', function () {
         var doctorId = this.value;
-        if (!doctorId || !availabilityData[doctorId]) {
+        if (!doctorId || !availabilityData[doctorId] || !availabilityData[doctorId].slots) {
             availabilityInfo.style.display = 'none';
             return;
         }
         availabilityList.innerHTML = '';
-        availabilityData[doctorId].forEach(function (s) {
+        var exceptions = availabilityData[doctorId].exceptions || {};
+        (availabilityData[doctorId].slots || []).forEach(function (s) {
             getUpcomingDates(s.day, 2).forEach(function (date) {
+                var iso = toISODate(date);
+                if (exceptions[iso] && exceptions[iso].is_blocked) return;
                 var chip = document.createElement('span');
                 chip.className = 'availability-chip';
-                chip.dataset.date = toISODate(date);
-                chip.textContent = formatDate(date) + '  ' + s.start + '–' + s.end;
+                chip.dataset.date = iso;
+                var label = formatDate(date) + '  ' + s.start + '–' + s.end;
+                if (exceptions[iso] && !exceptions[iso].is_blocked) {
+                    label = formatDate(date) + '  ' + exceptions[iso].start + '–' + exceptions[iso].end;
+                }
+                chip.textContent = label;
                 availabilityList.appendChild(chip);
             });
         });

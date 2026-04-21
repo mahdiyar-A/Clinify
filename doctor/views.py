@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import json
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -125,34 +126,77 @@ def doctor_profile(request):
 @login_required_custom(role='doctor')
 def doctor_availability(request):
     user_id, _ = get_user_from_session(request)
+    DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
+            'Friday', 'Saturday', 'Sunday']
+
     if request.method == 'POST':
         action = request.POST.get('action')
         try:
             if action == 'add':
-                services.add_availability(
-                    user_id,
-                    request.POST.get('day_of_week'),
-                    request.POST.get('start_time'),
-                    request.POST.get('end_time'),
+                start = request.POST.get('start_time')
+                end = request.POST.get('end_time')
+                apply_days = request.POST.getlist('days') or [
+                    request.POST.get('day_of_week')
+                ]
+                apply_days = [d for d in apply_days if d in DAYS]
+                if not apply_days:
+                    raise ValueError('Please select at least one day.')
+                for day in apply_days:
+                    services.add_availability(user_id, day, start, end)
+                messages.success(
+                    request,
+                    f"Slot added to {len(apply_days)} day{'s' if len(apply_days) != 1 else ''}.",
                 )
-                messages.success(request, 'Availability added.')
             elif action == 'delete':
                 services.delete_availability(
                     user_id,
                     request.POST.get('day_of_week'),
                     request.POST.get('start_time'),
                 )
-                messages.success(request, 'Availability removed.')
+                messages.success(request, 'Time slot removed.')
+            elif action == 'add_exception':
+                mode = request.POST.get('mode')  # 'block' or 'custom'
+                services.add_exception(
+                    user_id,
+                    request.POST.get('exception_date'),
+                    mode == 'block',
+                    request.POST.get('ex_start_time') or None,
+                    request.POST.get('ex_end_time') or None,
+                    request.POST.get('reason'),
+                )
+                messages.success(request, 'Exception saved.')
+            elif action == 'delete_exception':
+                services.delete_exception(
+                    user_id, int(request.POST.get('exception_id'))
+                )
+                messages.success(request, 'Exception removed.')
         except Exception as e:
             messages.error(request, f'Error: {e}')
         return redirect('doctor_availability')
 
+    today = timezone.localdate()
     try:
-        availability = selectors.list_availability(user_id)
+        rows = selectors.list_availability(user_id)
+        exceptions = selectors.list_exceptions(user_id, from_date=today)
     except Exception as e:
         messages.error(request, f'Error: {e}')
-        availability = []
-    return render(request, 'doctor/availability.html', {'availability': availability})
+        rows = []
+        exceptions = []
+
+    schedule_by_day = {d: [] for d in DAYS}
+    for day, start, end in rows:
+        schedule_by_day[day].append({'start': start, 'end': end})
+    weekly = [
+        {'day': d, 'slots': schedule_by_day[d], 'short': d[:3]}
+        for d in DAYS
+    ]
+
+    return render(request, 'doctor/availability.html', {
+        'weekly': weekly,
+        'exceptions': exceptions,
+        'today_iso': today.isoformat(),
+        'days': DAYS,
+    })
 
 
 @login_required_custom(role='doctor')

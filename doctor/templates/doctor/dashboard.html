@@ -3,6 +3,10 @@
 {% block title %}Calendar{% endblock %}
 {% block role_label %}Doctor Portal{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+{% endblock %}
+
 {% block nav %}
 <span class="nav-label">Menu</span>
 <a href="{% url 'doctor_dashboard' %}" class="nav-link active"><i data-lucide="calendar-days"></i><span>Calendar</span></a>
