@@ -1,0 +1,112 @@
+/* ── AUTH PAGES ─────────────────────────────────── */
+.auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e8f4f9 0%, #f0faf6 100%);
+}
+
+.auth-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 4px 24px rgba(15,126,166,.08);
+}
+
+.auth-card .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.auth-card .tagline {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 32px;
+}
+
+.auth-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text);
+}
+
+/* ── ROLE PICKER ────────────────────────────────── */
+.role-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.role-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--card);
+    transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+
+.role-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(15,126,166,.08);
+    transform: translateY(-1px);
+}
+
+.role-card .role-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--primary-lt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.role-card .role-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.role-card .role-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+
+.role-card .role-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+.role-card .role-arrow {
+    color: var(--muted);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.auth-note {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 20px;
+    line-height: 1.4;
+}

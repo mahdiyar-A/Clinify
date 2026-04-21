@@ -1,0 +1,429 @@
+/* ── Availability page ───────────────────────── */
+.avail-card .card-title { position: relative; }
+.card-title-action {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Composer form (add weekly slot, add exception) */
+.avail-composer {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+}
+.composer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px;
+}
+.composer-row .form-group { margin-bottom: 0; display: flex; flex-direction: column; }
+.composer-days { flex: 1 1 340px; min-width: 0; }
+.composer-hours { flex: 1 1 280px; min-width: 260px; position: relative; padding-bottom: 4px; }
+.composer-date { flex: 0 0 160px; }
+.composer-reason { flex: 1 1 180px; min-width: 160px; }
+.composer-submit {
+    flex-shrink: 0;
+    height: 40px;
+    padding: 0 20px;
+    white-space: nowrap;
+    align-self: flex-start;
+}
+/* Weekly composer (no labels): align submit with time-range top */
+#weekly-form .composer-submit { margin-top: 0; }
+/* Exception composer (has labels): push submit down to align with inputs */
+#exception-form .composer-submit { margin-top: 26px; }
+
+/* Day chips — bigger, more tappable */
+.day-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.day-chip {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+.day-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+.day-chip span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .01em;
+    transition: background .15s, border-color .15s, color .15s, transform .1s;
+}
+.day-chip:hover span {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.day-chip input:checked + span {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+.day-chip input:focus-visible + span {
+    box-shadow: 0 0 0 3px rgba(15, 126, 166, .2);
+}
+.day-chip-presets {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--primary);
+    cursor: pointer;
+    font-weight: 500;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* Weekly list — one row per day */
+.weekly-list {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.weekly-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+}
+.weekly-row:last-child { border-bottom: none; }
+.weekly-row:hover { background: #fafbfc; }
+.weekly-row--empty .weekly-row-day { color: var(--muted); }
+.weekly-row-day {
+    flex: 0 0 110px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+}
+.weekly-row-slots {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Slot chip — bigger, clearer */
+.slot-chip-form { margin: 0; display: inline-flex; }
+.slot-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--primary-lt);
+    color: var(--primary);
+    border-radius: 8px;
+    padding: 6px 6px 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background .15s;
+}
+.slot-chip:hover { background: #d6ebf2; }
+.slot-chip-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.slot-chip-time .t-sep { color: var(--primary); opacity: .5; font-weight: 400; }
+.slot-chip-remove {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    transition: background .15s, color .15s;
+}
+.slot-chip:hover .slot-chip-remove { visibility: visible; }
+.slot-chip-remove:hover { background: rgba(15, 126, 166, .25); color: var(--danger); }
+.slot-chip-remove svg { width: 14px; height: 14px; }
+.slot-empty {
+    font-size: 13px;
+    color: #aab3bf;
+    font-style: italic;
+}
+
+/* Compact time-range input (start + 'to' + end) */
+.time-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.time-range input[type=time],
+.time-range select {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    appearance: auto;
+}
+.time-range select:focus { border-color: var(--primary); outline: none; }
+
+/* ── Custom time picker ───────────────────────── */
+.timepicker {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+.timepicker-btn {
+    width: 100%;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+}
+.timepicker-btn:hover { border-color: var(--primary); }
+.timepicker-btn:focus { outline: none; border-color: var(--primary); }
+.timepicker-btn.has-value { color: var(--text); font-weight: 500; }
+.timepicker-icon { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+.timepicker-btn.has-value .timepicker-icon { color: var(--primary); }
+.timepicker-pop {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 40;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 35, 50, .12);
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+}
+.timepicker-pop[hidden] { display: none; }
+.tp-col { display: flex; flex-direction: column; gap: 6px; }
+.tp-col-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    text-align: center;
+}
+.tp-col-grid {
+    display: grid;
+    gap: 4px;
+}
+.tp-hours { grid-template-columns: repeat(3, 34px); }
+.tp-minutes { grid-template-columns: 48px; }
+.tp-period { grid-template-columns: 48px; }
+.tp-cell {
+    height: 30px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: #f5f7fa;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s, color .1s, border-color .1s;
+}
+.tp-cell:hover { background: var(--primary-lt); color: var(--primary); }
+.tp-cell.is-active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+.time-range-sep {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.field-hint {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+    min-height: 16px;
+    line-height: 1.3;
+}
+.field-hint--error { color: var(--danger); }
+
+/* Segmented control (Block / Custom) */
+.segmented {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    background: #fafbfc;
+    width: fit-content;
+}
+.segmented-opt {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+.segmented-opt input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.segmented-opt span {
+    display: inline-block;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-radius: 6px;
+    transition: background .15s, color .15s;
+}
+.segmented-opt:hover span { color: var(--primary); }
+.segmented-opt input:checked + span {
+    background: var(--primary);
+    color: #fff;
+}
+
+.exception-composer .form-group label {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    height: 20px;
+    line-height: 20px;
+}
+
+.exception-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.exception-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color .15s, background .15s;
+}
+.exception-item:hover { border-color: #cbd5e0; background: #fafbfc; }
+.exception-info { min-width: 0; flex: 1; }
+.exception-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.exception-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+.exception-reason {
+    color: var(--muted);
+    font-style: italic;
+}
+.btn-icon {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, color .15s;
+}
+.btn-icon:hover {
+    background: #fdecea;
+    color: var(--danger);
+}
+.btn-icon svg { width: 16px; height: 16px; }
+.empty-sm { padding: 20px; font-size: 13px; }
+.empty-inline {
+    padding: 14px 2px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* Composer date input sits like timepicker */
+.composer-date input[type=date] {
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    width: 100%;
+}
+.composer-date input[type=date]:focus { border-color: var(--primary); outline: none; }
+.composer-reason input[type=text] {
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    width: 100%;
+}
+.composer-reason input[type=text]:focus { border-color: var(--primary); outline: none; }
