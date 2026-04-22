@@ -1,12 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'profile_base.html' %}
 {% load static %}
 {% load phone_tags %}
 {% block title %}Profile{% endblock %}
 {% block role_label %}Patient Portal{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
-{% endblock %}
 
 {% block nav %}
 <span class="nav-label">Menu</span>
@@ -17,19 +13,13 @@
 <a href="{% url 'patient_profile' %}" class="nav-link active"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block page_header %}
-<div class="page-header">
-    <h1>My Profile</h1>
-    <p>View and update your information.</p>
-</div>
-{% endblock %}
-
-{% block content %}
-<div class="profile-wrap">
+{% block profile_alert %}
     {% if not profile_complete and not messages %}
     <div class="alert alert-error profile-alert">Please complete your profile before booking an appointment.</div>
     {% endif %}
+{% endblock %}
 
+{% block profile_form %}
     {% if profile %}
     <form method="POST">
         {% csrf_token %}
@@ -140,7 +130,6 @@
         </div>
     </form>
     {% endif %}
-</div>
 {% endblock %}
 
 {% block extra_js %}
