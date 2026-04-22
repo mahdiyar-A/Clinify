@@ -5,22 +5,22 @@
 -- All accounts use the password 'password'
 -- Staff (doctors/admins) use the @clinify.com domain.
 -- =====================================================
-INSERT INTO "USER" (first_name, last_name, email, phone, password_hash, role) VALUES
+INSERT INTO "USER" (first_name, last_name, email, phone, password_hash, role, is_active) VALUES
 -- Patients (IDs 1-6)
-('Alex',     'Johnson',   'alex.johnson@email.com',    '4031111111', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
-('Sarah',    'Lee',       'sarah.lee@email.com',       '4032222222', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
-('Michael',  'Brown',     'michael.brown@email.com',   '4033333333', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
-('Emma',     'Davis',     'emma.davis@email.com',      '4037777777', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
-('Liam',     'Martinez',  'liam.martinez@email.com',   '4038888888', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
-('Olivia',   'Chen',      'olivia.chen@email.com',     '4039999999', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient'),
+('Alex',     'Johnson',   'alex.johnson@email.com',    '4031111111', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient', TRUE),
+('Sarah',    'Lee',       'sarah.lee@email.com',       '4032222222', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient', TRUE),
+('Michael',  'Brown',     'michael.brown@email.com',   '4033333333', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient', TRUE),
+('Emma',     'Davis',     'emma.davis@email.com',      '4037777777', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient', TRUE),
+('Liam',     'Martinez',  'liam.martinez@email.com',   '4038888888', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient', TRUE),
+('Olivia',   'Chen',      'olivia.chen@email.com',     '4039999999', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'patient', TRUE),
 -- Doctors (IDs 7-10)
-('Rose',     'Smith',     'rose.smith@clinify.com',    '4034444444', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
-('James',    'Wilson',    'james.wilson@clinify.com',  '4035555555', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
-('Priya',    'Patel',     'priya.patel@clinify.com',   '4030101010', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
-('Marcus',   'Thompson',  'marcus.thompson@clinify.com','4030202020', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor'),
+('Rose',     'Smith',     'rose.smith@clinify.com',    '4034444444', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor', TRUE),
+('James',    'Wilson',    'james.wilson@clinify.com',  '4035555555', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor', TRUE),
+('Priya',    'Patel',     'priya.patel@clinify.com',   '4030101010', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor', TRUE),
+('Marcus',   'Thompson',  'marcus.thompson@clinify.com','4030202020', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'doctor', FALSE),
 -- Admins (IDs 11-12)
-('Sara',     'Admin',     'sara.admin@clinify.com',    '4036666666', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'admin'),
-('David',    'Reyes',     'david.reyes@clinify.com',   '4030303030', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'admin');
+('Sara',     'Admin',     'sara.admin@clinify.com',    '4036666666', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'admin', TRUE),
+('David',    'Reyes',     'david.reyes@clinify.com',   '4030303030', 'pbkdf2_sha256$600000$cd7oItCoJRKmEbS3IkjeiF$loeLo0vZjx0mQ2gufUVpD2I9tFmN5ItChrgqi1kkEZ0=', 'admin', TRUE);
 
 -- =====================================================
 -- ROLE-SPECIFIC TABLES
@@ -112,12 +112,12 @@ INSERT INTO appointment (appointment_date, appointment_time, status, reason, pat
 ('2026-04-21', '11:00:00', 'Scheduled', 'Seasonal allergies',              6, 7,  11),
 ('2026-04-22', '09:00:00', 'Scheduled', 'Child wellness visit',            5, 9,  12),
 ('2026-04-23', '13:30:00', 'Scheduled', 'Cardiac stress test review',      4, 8,  11),
-('2026-04-24', '09:00:00', 'Scheduled', 'Skin cancer screening',           3, 10, 11),
+('2026-04-24', '09:00:00', 'Cancelled', 'Skin cancer screening',           3, 10, 11),
 -- Next week and beyond
 ('2026-04-27', '09:00:00', 'Scheduled', 'Annual physical',                 2, 7,  11),
 ('2026-04-28', '10:00:00', 'Scheduled', 'Heart murmur evaluation',         1, 8,  12),
 ('2026-04-29', '08:30:00', 'Scheduled', 'Pediatric follow-up',             5, 9,  11),
-('2026-05-04', '09:00:00', 'Scheduled', 'Dermatitis check',                6, 10, 11),
+('2026-05-04', '09:00:00', 'Cancelled', 'Dermatitis check',                6, 10, 11),
 ('2026-05-07', '13:00:00', 'Scheduled', 'Post-op follow-up',               3, 7,  12);
 
 -- =====================================================
