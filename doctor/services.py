@@ -12,7 +12,7 @@ def update_profile(doctor_id, phone, specialty):
             (phone, doctor_id),
         )
         cur.execute(
-            'UPDATE doctor SET specialty = %s WHERE doctor_id = %s',
+            'UPDATE doctor SET specialty = %s WHERE user_id = %s',
             (specialty or None, doctor_id),
         )
 

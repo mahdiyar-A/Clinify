@@ -20,10 +20,10 @@ def list_recent_appointments(limit=10):
                       pu.first_name || ' ' || pu.last_name AS patient_name,
                       du.first_name || ' ' || du.last_name AS doctor_name
                FROM appointment a
-               JOIN patient p ON a.patient_id = p.patient_id
-               JOIN "USER" pu ON p.patient_id = pu.user_id
-               JOIN doctor d ON a.doctor_id = d.doctor_id
-               JOIN "USER" du ON d.doctor_id = du.user_id
+               JOIN patient p ON a.patient_id = p.user_id
+               JOIN "USER" pu ON p.user_id = pu.user_id
+               JOIN doctor d ON a.doctor_id = d.user_id
+               JOIN "USER" du ON d.user_id = du.user_id
                ORDER BY a.appointment_date DESC LIMIT %s''',
             (limit,),
         )
@@ -38,10 +38,10 @@ def list_all_appointments():
                       pu.first_name || ' ' || pu.last_name AS patient_name,
                       du.first_name || ' ' || du.last_name AS doctor_name
                FROM appointment a
-               JOIN patient p ON a.patient_id = p.patient_id
-               JOIN "USER" pu ON p.patient_id = pu.user_id
-               JOIN doctor d ON a.doctor_id = d.doctor_id
-               JOIN "USER" du ON d.doctor_id = du.user_id
+               JOIN patient p ON a.patient_id = p.user_id
+               JOIN "USER" pu ON p.user_id = pu.user_id
+               JOIN doctor d ON a.doctor_id = d.user_id
+               JOIN "USER" du ON d.user_id = du.user_id
                ORDER BY a.appointment_date DESC'''
         )
         return cur.fetchall()

@@ -15,7 +15,7 @@ def get_profile(doctor_id):
         cur.execute(
             '''SELECT u.first_name, u.last_name, u.email, u.phone,
                       d.specialty, d.license_number
-               FROM "USER" u JOIN doctor d ON u.user_id = d.doctor_id
+               FROM "USER" u JOIN doctor d ON u.user_id = d.user_id
                WHERE u.user_id = %s''',
             (doctor_id,),
         )
@@ -39,8 +39,8 @@ def list_appointments_in_range(doctor_id, start_date, end_date):
                       u.first_name || ' ' || u.last_name AS patient_name,
                       a.patient_id, a.appointment_id
                FROM appointment a
-               JOIN patient p ON a.patient_id = p.patient_id
-               JOIN "USER" u ON p.patient_id = u.user_id
+               JOIN patient p ON a.patient_id = p.user_id
+               JOIN "USER" u ON p.user_id = u.user_id
                WHERE a.doctor_id = %s
                  AND a.appointment_date BETWEEN %s AND %s
                ORDER BY a.appointment_date, a.appointment_time''',
@@ -57,8 +57,8 @@ def get_appointment(doctor_id, appointment_id):
                       u.first_name, u.last_name,
                       p.date_of_birth, p.gender
                FROM appointment a
-               JOIN patient p ON a.patient_id = p.patient_id
-               JOIN "USER" u ON p.patient_id = u.user_id
+               JOIN patient p ON a.patient_id = p.user_id
+               JOIN "USER" u ON p.user_id = u.user_id
                WHERE a.appointment_id = %s AND a.doctor_id = %s''',
             (appointment_id, doctor_id),
         )
@@ -124,8 +124,8 @@ def get_patient_details(patient_id):
         cur.execute(
             '''SELECT u.first_name, u.last_name, p.date_of_birth, p.gender, p.address,
                       p.emergency_contact_name, p.emergency_contact_phone
-               FROM patient p JOIN "USER" u ON p.patient_id = u.user_id
-               WHERE p.patient_id = %s''',
+               FROM patient p JOIN "USER" u ON p.user_id = u.user_id
+               WHERE p.user_id = %s''',
             (patient_id,),
         )
         return cur.fetchone()
@@ -160,8 +160,8 @@ def list_prescriptions(doctor_id):
                       m.medication_name, c.frequency, c.duration
                FROM prescription p
                JOIN visit v ON p.visit_id = v.appointment_id
-               JOIN patient pt ON v.patient_id = pt.patient_id
-               JOIN "USER" u ON pt.patient_id = u.user_id
+               JOIN patient pt ON v.patient_id = pt.user_id
+               JOIN "USER" u ON pt.user_id = u.user_id
                JOIN contains c ON p.prescription_id = c.prescription_id
                JOIN medication m ON c.medication_id = m.medication_id
                WHERE p.doctor_id = %s ORDER BY p.issue_date DESC''',
@@ -182,8 +182,8 @@ def list_visits_for_prescriptions(doctor_id):
             '''SELECT v.appointment_id, v.visit_date,
                       u.first_name || ' ' || u.last_name AS patient_name
                FROM visit v
-               JOIN patient p ON v.patient_id = p.patient_id
-               JOIN "USER" u ON p.patient_id = u.user_id
+               JOIN patient p ON v.patient_id = p.user_id
+               JOIN "USER" u ON p.user_id = u.user_id
                JOIN appointment a ON v.appointment_id = a.appointment_id
                LEFT JOIN prescription pr ON pr.visit_id = v.appointment_id
                WHERE a.doctor_id = %s

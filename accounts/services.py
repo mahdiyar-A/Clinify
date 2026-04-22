@@ -29,7 +29,7 @@ def register_patient(data):
         )
         user_id = cur.fetchone()[0]
         cur.execute(
-            'INSERT INTO patient (patient_id) VALUES (%s)',
+            'INSERT INTO patient (user_id) VALUES (%s)',
             (user_id,),
         )
         cur.execute(
@@ -68,7 +68,7 @@ def register_doctor(data):
         )
         user_id = cur.fetchone()[0]
         cur.execute(
-            'INSERT INTO doctor (doctor_id, license_number) VALUES (%s, %s)',
+            'INSERT INTO doctor (user_id, license_number) VALUES (%s, %s)',
             (user_id, data['license_number']),
         )
     return user_id

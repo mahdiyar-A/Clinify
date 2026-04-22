@@ -23,7 +23,7 @@ def create_admin(data):
             (first_name, last_name, data['email'], password_hash),
         )
         user_id = cur.fetchone()[0]
-        cur.execute('INSERT INTO admin (admin_id) VALUES (%s)', (user_id,))
+        cur.execute('INSERT INTO admin (user_id) VALUES (%s)', (user_id,))
     return user_id
 
 

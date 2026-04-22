@@ -45,7 +45,7 @@ def update_profile(patient_id, phone, date_of_birth, gender, address,
             '''UPDATE patient
                SET date_of_birth = %s, gender = %s, address = %s,
                    emergency_contact_name = %s, emergency_contact_phone = %s
-               WHERE patient_id = %s''',
+               WHERE user_id = %s''',
             (date_of_birth, gender, address,
              emergency_contact_name, emergency_contact_phone, patient_id),
         )

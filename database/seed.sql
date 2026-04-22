@@ -25,7 +25,7 @@ INSERT INTO "USER" (first_name, last_name, email, phone, password_hash, role, is
 -- =====================================================
 -- ROLE-SPECIFIC TABLES
 -- =====================================================
-INSERT INTO patient (patient_id, date_of_birth, gender, address, emergency_contact_name, emergency_contact_phone) VALUES
+INSERT INTO patient (user_id, date_of_birth, gender, address, emergency_contact_name, emergency_contact_phone) VALUES
 (1, '1995-03-10', 'Male',   '123 Main St, Calgary',       'Mary Johnson',   '4039991111'),
 (2, '1988-07-22', 'Female', '456 Oak Ave, Calgary',       'Tom Lee',        '4039992222'),
 (3, '2000-11-05', 'Male',   '789 Pine Rd, Calgary',       'Lisa Brown',     '4039993333'),
@@ -33,13 +33,13 @@ INSERT INTO patient (patient_id, date_of_birth, gender, address, emergency_conta
 (5, '2003-09-30', 'Male',   '654 Cedar Cres, Calgary',    'Elena Martinez', '4039995555'),
 (6, '1992-12-18', 'Female', '987 Maple Way, Calgary',     'Wei Chen',       '4039996666');
 
-INSERT INTO doctor (doctor_id, specialty, license_number) VALUES
+INSERT INTO doctor (user_id, specialty, license_number) VALUES
 (7,  'Family Medicine', 'LIC10001'),
 (8,  'Cardiology',      'LIC10002'),
 (9,  'Pediatrics',      'LIC10003'),
 (10, 'Dermatology',     'LIC10004');
 
-INSERT INTO admin (admin_id) VALUES (11), (12);
+INSERT INTO admin (user_id) VALUES (11), (12);
 
 INSERT INTO medical_record (patient_id, record_number) VALUES
 (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1);
