@@ -2,6 +2,7 @@ from django.contrib.auth.hashers import make_password
 
 from accounts import selectors as account_selectors
 from common.db import db_cursor
+from common.names import normalize_person_name
 from common.phone import normalize_phone
 
 from . import selectors
@@ -12,12 +13,14 @@ def create_admin(data):
     if account_selectors.email_exists(data['email']):
         raise ValueError('An account with this email already exists.')
 
+    first_name = normalize_person_name(data['first_name'])
+    last_name = normalize_person_name(data['last_name'])
     password_hash = make_password(data['password'])
     with db_cursor(commit=True) as cur:
         cur.execute(
             '''INSERT INTO "USER" (first_name, last_name, email, password_hash, role)
                VALUES (%s, %s, %s, %s, 'admin') RETURNING user_id''',
-            (data['first_name'], data['last_name'], data['email'], password_hash),
+            (first_name, last_name, data['email'], password_hash),
         )
         user_id = cur.fetchone()[0]
         cur.execute('INSERT INTO admin (admin_id) VALUES (%s)', (user_id,))
