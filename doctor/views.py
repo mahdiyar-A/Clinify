@@ -129,6 +129,9 @@ def doctor_availability(request):
     DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
             'Friday', 'Saturday', 'Sunday']
 
+    form_values = {'days': [], 'start_time': '', 'end_time': ''}
+    had_error = False
+
     if request.method == 'POST':
         action = request.POST.get('action')
         try:
@@ -139,14 +142,15 @@ def doctor_availability(request):
                     request.POST.get('day_of_week')
                 ]
                 apply_days = [d for d in apply_days if d in DAYS]
-                if not apply_days:
-                    raise ValueError('Please select at least one day.')
-                for day in apply_days:
-                    services.add_availability(user_id, day, start, end)
+                form_values = {
+                    'days': apply_days, 'start_time': start or '', 'end_time': end or '',
+                }
+                services.add_availability_slots(user_id, apply_days, start, end)
                 messages.success(
                     request,
                     f"Slot added to {len(apply_days)} day{'s' if len(apply_days) != 1 else ''}.",
                 )
+                return redirect('doctor_availability')
             elif action == 'delete':
                 services.delete_availability(
                     user_id,
@@ -154,9 +158,15 @@ def doctor_availability(request):
                     request.POST.get('start_time'),
                 )
                 messages.success(request, 'Time slot removed.')
-        except Exception as e:
-            messages.error(request, f'Error: {e}')
-        return redirect('doctor_availability')
+                return redirect('doctor_availability')
+        except ValueError as e:
+            messages.error(request, str(e))
+            had_error = True
+        except Exception:
+            messages.error(request, 'Something went wrong. Please try again.')
+            had_error = True
+        if not had_error:
+            return redirect('doctor_availability')
 
     try:
         rows = selectors.list_availability(user_id)
@@ -175,6 +185,7 @@ def doctor_availability(request):
     return render(request, 'doctor/availability.html', {
         'weekly': weekly,
         'days': DAYS,
+        'form_values': form_values,
     })
 
 

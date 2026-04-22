@@ -26,19 +26,56 @@ def _fmt_time(t):
         return t
 
 
-def add_availability(doctor_id, day_of_week, start_time, end_time):
+def _time_str(t):
+    # Normalize a time value (string 'HH:MM[:SS]' or time object) to 'HH:MM'.
+    s = t.strftime('%H:%M') if hasattr(t, 'strftime') else str(t)
+    return s[:5]
+
+
+def add_availability_slots(doctor_id, days, start_time, end_time):
+    if not days:
+        raise ValueError('Please select at least one day.')
     if not start_time or not end_time:
         raise ValueError('Please pick both a start and end time.')
-    if start_time >= end_time:
+    if start_time == end_time:
+        raise ValueError(
+            f'Start and end time are the same ({_fmt_time(start_time)}). Please choose a range.'
+        )
+    if start_time > end_time:
         raise ValueError(
             f'End time ({_fmt_time(end_time)}) must be after start time ({_fmt_time(start_time)}).'
         )
     with db_cursor(commit=True) as cur:
         cur.execute(
-            'INSERT INTO availability (doctor_id, day_of_week, start_time, end_time) '
-            'VALUES (%s, %s, %s, %s)',
-            (doctor_id, day_of_week, start_time, end_time),
+            '''SELECT day_of_week, start_time, end_time FROM availability
+               WHERE doctor_id = %s AND day_of_week = ANY(%s)''',
+            (doctor_id, list(days)),
         )
+        existing = cur.fetchall()
+        for day, ex_start, ex_end in existing:
+            ex_s, ex_e = _time_str(ex_start), _time_str(ex_end)
+            if start_time == ex_s and end_time == ex_e:
+                raise ValueError(
+                    f'You already have this exact slot on {day} ({_fmt_time(ex_s)} – {_fmt_time(ex_e)}).'
+                )
+            if start_time == ex_s:
+                raise ValueError(
+                    f'You already have a slot starting at {_fmt_time(ex_s)} on {day}.'
+                )
+            if end_time == ex_e:
+                raise ValueError(
+                    f'You already have a slot ending at {_fmt_time(ex_e)} on {day}.'
+                )
+            if start_time < ex_e and end_time > ex_s:
+                raise ValueError(
+                    f'This overlaps your existing {_fmt_time(ex_s)} – {_fmt_time(ex_e)} slot on {day}.'
+                )
+        for day in days:
+            cur.execute(
+                'INSERT INTO availability (doctor_id, day_of_week, start_time, end_time) '
+                'VALUES (%s, %s, %s, %s)',
+                (doctor_id, day, start_time, end_time),
+            )
 
 
 def delete_availability(doctor_id, day_of_week, start_time):

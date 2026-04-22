@@ -36,7 +36,7 @@
                 <div class="day-chip-group" id="day-chip-group">
                     {% for d in days %}
                     <label class="day-chip">
-                        <input type="checkbox" name="days" value="{{ d }}">
+                        <input type="checkbox" name="days" value="{{ d }}"{% if d in form_values.days %} checked{% endif %}>
                         <span>{{ d|slice:":3" }}</span>
                     </label>
                     {% endfor %}
@@ -49,7 +49,7 @@
             <div class="composer-hours">
                 <div class="time-range">
                     <div class="timepicker" data-timepicker>
-                        <input type="hidden" name="start_time" id="weekly-start" required>
+                        <input type="hidden" name="start_time" id="weekly-start" value="{{ form_values.start_time }}" required>
                         <button type="button" class="timepicker-btn" data-tp-trigger>
                             <span data-tp-display>Start</span>
                             <i data-lucide="clock" class="timepicker-icon"></i>
@@ -57,7 +57,7 @@
                     </div>
                     <span class="time-range-sep">to</span>
                     <div class="timepicker" data-timepicker>
-                        <input type="hidden" name="end_time" id="weekly-end" required>
+                        <input type="hidden" name="end_time" id="weekly-end" value="{{ form_values.end_time }}" required>
                         <button type="button" class="timepicker-btn" data-tp-trigger>
                             <span data-tp-display>End</span>
                             <i data-lucide="clock" class="timepicker-icon"></i>
