@@ -16,12 +16,14 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Availability</h1>
     <p>Set your weekly hours.</p>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="card avail-card">
     <div class="card-title">
         <i data-lucide="repeat" class="title-icon"></i>

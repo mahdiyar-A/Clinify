@@ -6,6 +6,12 @@ from common.phone import normalize_phone
 
 def update_profile(patient_id, phone, date_of_birth, gender, address,
                    emergency_contact_name, emergency_contact_phone):
+    gender = (gender or '').strip()
+    if not gender:
+        raise ValueError('Gender is required.')
+    if gender not in {'Male', 'Female', 'Other'}:
+        raise ValueError('Invalid gender selection.')
+
     phone = normalize_phone(phone)
     emergency_contact_phone = normalize_phone(emergency_contact_phone)
     with db_cursor(commit=True) as cur:
@@ -18,7 +24,7 @@ def update_profile(patient_id, phone, date_of_birth, gender, address,
                SET date_of_birth = %s, gender = %s, address = %s,
                    emergency_contact_name = %s, emergency_contact_phone = %s
                WHERE patient_id = %s''',
-            (date_of_birth or None, gender or None, address,
+            (date_of_birth or None, gender, address,
              emergency_contact_name, emergency_contact_phone, patient_id),
         )
 

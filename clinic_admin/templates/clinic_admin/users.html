@@ -13,12 +13,14 @@
 <a href="{% url 'admin_create_admin' %}" class="nav-link"><i data-lucide="user-plus"></i><span>Create Admin</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>User Accounts</h1>
     <p>View, edit, or remove system users.</p>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="card">
     {% if users %}
     <div class="table-wrap">

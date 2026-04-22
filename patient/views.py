@@ -13,7 +13,7 @@ from . import selectors, services
 def _profile_is_complete(profile):
     # profile tuple: (first_name, last_name, email, phone, dob, gender,
     # address, emergency_contact_name, emergency_contact_phone)
-    return bool(profile and profile[4])  # date_of_birth set
+    return bool(profile and profile[4] and profile[5])  # dob + gender set
 
 
 @login_required_custom(role='patient')
@@ -25,7 +25,7 @@ def patient_dashboard(request):
         if not _profile_is_complete(profile):
             messages.error(
                 request,
-                'Please complete your profile before booking appointments.',
+                'Please complete your profile before booking an appointment.',
             )
             return redirect('patient_profile')
         appointments = selectors.list_recent_appointments(user_id)
@@ -78,7 +78,7 @@ def patient_appointments(request):
         if not _profile_is_complete(selectors.get_profile(user_id)):
             messages.error(
                 request,
-                'Please complete your profile before booking appointments.',
+                'Please complete your profile before booking an appointment.',
             )
             return redirect('patient_profile')
     except Exception as e:

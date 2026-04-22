@@ -1,0 +1,47 @@
+/* ── Patient profile ──────────────────────────── */
+.profile-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.profile-card { margin-bottom: 0; }
+.profile-card .card-title { margin-bottom: 14px; }
+.profile-card .card-subtitle { margin-top: 18px; }
+.profile-card .card-subtitle:first-of-type { margin-top: 0; }
+
+.input-readonly {
+    background: #f5f7fa !important;
+    color: var(--muted);
+}
+
+/* Select wrapper with consistent chevron */
+.select-wrap { position: relative; }
+.select-wrap select {
+    padding-right: 40px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+.select-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+    pointer-events: none;
+}
+.select-wrap select:focus + .select-icon { color: var(--primary); }
+
+@media (max-width: 720px) {
+    .profile-card .form-row { grid-template-columns: 1fr; }
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.profile-alert { margin-bottom: 16px; }

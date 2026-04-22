@@ -11,12 +11,14 @@
 <a href="{% url 'admin_create_admin' %}" class="nav-link"><i data-lucide="user-plus"></i><span>Create Admin</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Admin Dashboard</h1>
     <p>{{ today }}</p>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="stats-row">
     <div class="stat-card">
         <div class="label">Patients</div>

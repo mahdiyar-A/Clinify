@@ -16,15 +16,16 @@
 <a href="{% url 'patient_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
-
-<div id="availability-data" data-json="{{ availability_json }}" hidden></div>
-<div id="doctors-data" data-json="{{ doctors_json }}" hidden></div>
-
+{% block page_header %}
 <div class="page-header">
     <h1>Appointments</h1>
     <p>Book a new visit or manage your upcoming appointments.</p>
 </div>
+{% endblock %}
+
+{% block content %}
+<div id="availability-data" data-json="{{ availability_json }}" hidden></div>
+<div id="doctors-data" data-json="{{ doctors_json }}" hidden></div>
 
 <div class="card">
     <div class="card-title">

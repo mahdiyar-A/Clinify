@@ -11,12 +11,14 @@
 <a href="{% url 'patient_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Prescriptions</h1>
     <p>Your medication prescriptions from past visits.</p>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="card">
     {% if prescriptions %}
     <div class="table-wrap">

@@ -11,12 +11,14 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Appointment</h1>
     <p><a href="{% url 'doctor_dashboard' %}?month={{ appointment.1|date:"Y-m" }}&date={{ appointment.1|date:"Y-m-d" }}">&larr; Back to calendar</a></p>
 </div>
+{% endblock %}
 
+{% block content %}
 {% if appointment %}
 <div class="card">
     <div class="card-title">Details</div>

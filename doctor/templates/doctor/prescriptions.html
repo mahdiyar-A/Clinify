@@ -10,7 +10,7 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Prescriptions</h1>
     {% if selected_visit_id %}
@@ -19,7 +19,9 @@
     <p>Create and manage prescriptions.</p>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="card">
     <div class="card-title">New Prescription</div>
     <form method="POST">

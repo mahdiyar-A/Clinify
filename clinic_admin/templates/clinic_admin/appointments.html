@@ -12,12 +12,14 @@
 <a href="{% url 'admin_create_admin' %}" class="nav-link"><i data-lucide="user-plus"></i><span>Create Admin</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Appointments</h1>
     <p>Manage all clinic appointments.</p>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="card">
     {% if appointments %}
     <div class="table-wrap">

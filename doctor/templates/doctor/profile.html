@@ -11,14 +11,14 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link active"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>My Profile</h1>
     <p>View and update your information.</p>
 </div>
+{% endblock %}
 
-
-
+{% block content %}
 <div class="card">
     {% if profile %}
     <form method="POST">

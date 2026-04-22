@@ -11,7 +11,7 @@
 <a href="{% url 'patient_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header" style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap;">
     <div>
         <h1>Welcome, {% if user %}{{ user.0 }} {{ user.1 }}{% endif %}</h1>
@@ -19,7 +19,9 @@
     </div>
     <a href="{% url 'patient_appointments' %}" class="btn btn-primary">Book Appointment</a>
 </div>
+{% endblock %}
 
+{% block content %}
 {% if next_appt %}
 <div class="card" style="border-left:4px solid var(--primary);">
     <div style="font-size:12px; color:var(--muted); letter-spacing:.5px; font-weight:600;">NEXT APPOINTMENT</div>
