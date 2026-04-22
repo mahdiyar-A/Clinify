@@ -8,6 +8,15 @@
     margin-bottom: 20px;
     align-items: start;
 }
+.booking-grid--book {
+    grid-template-columns: 320px 1fr;
+}
+.booking-side {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.booking-side .form-group:last-child { margin-bottom: 0; }
 @media (max-width: 780px) {
     .booking-grid { grid-template-columns: 1fr; }
 }
