@@ -6,14 +6,36 @@ from common.phone import normalize_phone
 
 def update_profile(patient_id, phone, date_of_birth, gender, address,
                    emergency_contact_name, emergency_contact_phone):
+    phone = normalize_phone(phone)
+    if not phone:
+        raise ValueError('Phone number is required.')
+
+    date_of_birth = (date_of_birth or '').strip()
+    if not date_of_birth:
+        raise ValueError('Date of birth is required.')
+    try:
+        datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
+    except ValueError:
+        raise ValueError('Invalid date of birth.') from None
+
     gender = (gender or '').strip()
     if not gender:
         raise ValueError('Gender is required.')
     if gender not in {'Male', 'Female', 'Other'}:
         raise ValueError('Invalid gender selection.')
 
-    phone = normalize_phone(phone)
+    address = (address or '').strip()
+    if not address:
+        raise ValueError('Address is required.')
+
+    emergency_contact_name = (emergency_contact_name or '').strip()
+    if not emergency_contact_name:
+        raise ValueError('Emergency contact name is required.')
+
     emergency_contact_phone = normalize_phone(emergency_contact_phone)
+    if not emergency_contact_phone:
+        raise ValueError('Emergency contact phone is required.')
+
     with db_cursor(commit=True) as cur:
         cur.execute(
             'UPDATE "USER" SET phone = %s WHERE user_id = %s',
@@ -24,7 +46,7 @@ def update_profile(patient_id, phone, date_of_birth, gender, address,
                SET date_of_birth = %s, gender = %s, address = %s,
                    emergency_contact_name = %s, emergency_contact_phone = %s
                WHERE patient_id = %s''',
-            (date_of_birth or None, gender, address,
+            (date_of_birth, gender, address,
              emergency_contact_name, emergency_contact_phone, patient_id),
         )
 

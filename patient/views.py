@@ -13,7 +13,15 @@ from . import selectors, services
 def _profile_is_complete(profile):
     # profile tuple: (first_name, last_name, email, phone, dob, gender,
     # address, emergency_contact_name, emergency_contact_phone)
-    return bool(profile and profile[4] and profile[5])  # dob + gender set
+    return bool(
+        profile
+        and profile[3]  # phone
+        and profile[4]  # date_of_birth
+        and profile[5]  # gender
+        and profile[6]  # address
+        and profile[7]  # emergency_contact_name
+        and profile[8]  # emergency_contact_phone
+    )
 
 
 @login_required_custom(role='patient')
