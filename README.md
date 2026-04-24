@@ -6,13 +6,31 @@ CPSC 471 - Group 27
 
 ## Setup
 
-1. Get the `.env` file in the root folder
+1. Create your local environment file
+
+```bash
+cp .env.template .env
+```
+
+Update `.env` with your local values:
+
+| Variable      | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `SECRET_KEY`  | Django secret key generated in step 4            |
+| `DEBUG`       | Use `True` for local development                 |
+| `DB_NAME`     | PostgreSQL database name                         |
+| `DB_USER`     | PostgreSQL user                                  |
+| `DB_PASSWORD` | PostgreSQL password for `DB_USER`                |
+| `DB_HOST`     | PostgreSQL host                                  |
+
 2. Create virtual environment and activate it
 
 ```bash
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate
 ```
+
+On Windows, use `venv\Scripts\activate`.
 
 3. Install dependencies
 
@@ -20,7 +38,15 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Set up the database (PostgreSQL must be installed)
+4. Generate a Django secret key
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Copy the output into `SECRET_KEY` in `.env`.
+
+5. Set up the database (PostgreSQL must be installed)
 
 ```bash
 psql -U postgres -f database/schema.sql
@@ -28,7 +54,7 @@ psql -U postgres -f database/seed.sql
 python manage.py migrate
 ```
 
-5. Run
+6. Run
 
 ```bash
 python manage.py runserver
@@ -46,9 +72,9 @@ python manage.py runserver
 | `patient/`      | Patient portal views and templates                  |
 | `doctor/`       | Doctor portal views and templates                   |
 | `clinic_admin/` | Admin panel views and templates                     |
+| `templates/`    | Shared templates                                    |
+| `static/`       | CSS and JavaScript assets                           |
 | `database/`     | PostgreSQL schema and seed data                     |
-
-Each feature app is split into `urls.py` → `views.py` (thin, HTTP only) → `services.py` (writes) / `selectors.py` (reads), which call the raw-SQL helpers in `common/db.py`.
 
 ---
 
@@ -67,6 +93,6 @@ All seed accounts use the password `password`. Staff accounts (doctors and admin
 | `rose.smith@clinify.com`        | Doctor  | Family Medicine       |
 | `james.wilson@clinify.com`      | Doctor  | Cardiology            |
 | `priya.patel@clinify.com`       | Doctor  | Pediatrics            |
-| `marcus.thompson@clinify.com`   | Doctor  | Dermatology           |
+| `marcus.thompson@clinify.com`   | Doctor  | Dermatology, inactive |
 | `sara.admin@clinify.com`        | Admin   |                       |
 | `david.reyes@clinify.com`       | Admin   |                       |
