@@ -13,7 +13,15 @@ from . import selectors, services
 def _profile_is_complete(profile):
     # profile tuple: (first_name, last_name, email, phone, dob, gender,
     # address, emergency_contact_name, emergency_contact_phone)
-    return bool(profile and profile[4])  # date_of_birth set
+    return bool(
+        profile
+        and profile[3]  # phone
+        and profile[4]  # date_of_birth
+        and profile[5]  # gender
+        and profile[6]  # address
+        and profile[7]  # emergency_contact_name
+        and profile[8]  # emergency_contact_phone
+    )
 
 
 @login_required_custom(role='patient')
@@ -25,7 +33,7 @@ def patient_dashboard(request):
         if not _profile_is_complete(profile):
             messages.error(
                 request,
-                'Please complete your profile before booking appointments.',
+                'Please complete your profile before booking an appointment.',
             )
             return redirect('patient_profile')
         appointments = selectors.list_recent_appointments(user_id)
@@ -78,7 +86,7 @@ def patient_appointments(request):
         if not _profile_is_complete(selectors.get_profile(user_id)):
             messages.error(
                 request,
-                'Please complete your profile before booking appointments.',
+                'Please complete your profile before booking an appointment.',
             )
             return redirect('patient_profile')
     except Exception as e:
@@ -121,9 +129,15 @@ def patient_appointments(request):
         messages.error(request, f'Error: {e}')
         doctors, appointments, availability_map = [], [], {}
 
+    doctors_json = json.dumps([
+        {'id': str(d[0]), 'name': f'Dr. {d[1]}', 'specialty': d[2]}
+        for d in doctors
+    ])
+
     return render(request, 'patient/appointments.html', {
         'appointments': appointments,
         'doctors': doctors,
+        'doctors_json': doctors_json,
         'availability_json': json.dumps(availability_map),
     })
 

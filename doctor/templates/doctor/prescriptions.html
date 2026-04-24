@@ -10,7 +10,7 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Prescriptions</h1>
     {% if selected_visit_id %}
@@ -19,7 +19,9 @@
     <p>Create and manage prescriptions.</p>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="card">
     <div class="card-title">New Prescription</div>
     <form method="POST">
@@ -39,7 +41,8 @@
             <div class="med-row form-row" style="margin-bottom:8px;">
                 <div class="form-group">
                     <label>Medication</label>
-                    <select name="medication_id">
+                    <select name="medication_id" required>
+                        <option value="">Select medication</option>
                         {% for m in medications %}
                         <option value="{{ m.0 }}">{{ m.1 }}</option>
                         {% endfor %}
@@ -47,11 +50,11 @@
                 </div>
                 <div class="form-group">
                     <label>Frequency</label>
-                    <input type="text" name="frequency" placeholder="e.g. Twice daily">
+                    <input type="text" name="frequency" placeholder="e.g. Twice daily" maxlength="100" required>
                 </div>
                 <div class="form-group">
                     <label>Duration</label>
-                    <input type="text" name="duration" placeholder="e.g. 5 days">
+                    <input type="text" name="duration" placeholder="e.g. 5 days" maxlength="100" required>
                 </div>
             </div>
         </div>

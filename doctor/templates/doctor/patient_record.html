@@ -11,7 +11,7 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Patient Record</h1>
     {% if from_appointment %}
@@ -20,7 +20,9 @@
     <p><a href="{% url 'doctor_dashboard' %}">&larr; Back to calendar</a></p>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block content %}
 {% if patient %}
 <div class="card">
     <div class="card-title">Patient Information</div>

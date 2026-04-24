@@ -18,35 +18,36 @@ CREATE TABLE "USER" (
     Email       VARCHAR(100) NOT NULL UNIQUE,
     Phone       VARCHAR(20),
     Password_Hash VARCHAR(255) NOT NULL,
+    Is_Active   BOOLEAN      NOT NULL DEFAULT TRUE,
     Role        VARCHAR(10)  NOT NULL,
     CONSTRAINT chk_role CHECK (Role IN ('patient', 'doctor', 'admin'))
 );
 
 CREATE TABLE PATIENT (
-    Patient_ID              INT PRIMARY KEY,
+    User_ID                 INT PRIMARY KEY,
     Date_Of_Birth           DATE,
     Gender                  VARCHAR(20),
     Address                 VARCHAR(255),
     Emergency_Contact_Name  VARCHAR(100),
     Emergency_Contact_Phone VARCHAR(20),
     CONSTRAINT fk_patient_user
-        FOREIGN KEY (Patient_ID) REFERENCES "USER"(User_ID)
+        FOREIGN KEY (User_ID) REFERENCES "USER"(User_ID)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE DOCTOR (
-    Doctor_ID      INT PRIMARY KEY,
+    User_ID        INT PRIMARY KEY,
     Specialty      VARCHAR(100),
     License_Number VARCHAR(50) NOT NULL UNIQUE,
     CONSTRAINT fk_doctor_user
-        FOREIGN KEY (Doctor_ID) REFERENCES "USER"(User_ID)
+        FOREIGN KEY (User_ID) REFERENCES "USER"(User_ID)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ADMIN (
-    Admin_ID INT PRIMARY KEY,
+    User_ID INT PRIMARY KEY,
     CONSTRAINT fk_admin_user
-        FOREIGN KEY (Admin_ID) REFERENCES "USER"(User_ID)
+        FOREIGN KEY (User_ID) REFERENCES "USER"(User_ID)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -55,7 +56,7 @@ CREATE TABLE MEDICAL_RECORD (
     Record_Number INT NOT NULL,
     PRIMARY KEY (Patient_ID, Record_Number),
     CONSTRAINT fk_medicalrecord_patient
-        FOREIGN KEY (Patient_ID) REFERENCES PATIENT(Patient_ID)
+        FOREIGN KEY (Patient_ID) REFERENCES PATIENT(User_ID)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -71,13 +72,13 @@ CREATE TABLE APPOINTMENT (
     CONSTRAINT chk_appointment_status
         CHECK (Status IN ('Scheduled', 'Completed', 'Cancelled', 'No-Show')),
     CONSTRAINT fk_appointment_patient
-        FOREIGN KEY (Patient_ID) REFERENCES PATIENT(Patient_ID)
+        FOREIGN KEY (Patient_ID) REFERENCES PATIENT(User_ID)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_appointment_doctor
-        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(Doctor_ID)
+        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(User_ID)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_appointment_admin
-        FOREIGN KEY (Admin_ID) REFERENCES ADMIN(Admin_ID)
+        FOREIGN KEY (Admin_ID) REFERENCES ADMIN(User_ID)
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -114,7 +115,7 @@ CREATE TABLE PRESCRIPTION (
         FOREIGN KEY (Visit_ID) REFERENCES VISIT(Appointment_ID)
         ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_prescription_doctor
-        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(Doctor_ID)
+        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(User_ID)
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -146,26 +147,7 @@ CREATE TABLE AVAILABILITY (
     CONSTRAINT chk_time_window
         CHECK (Start_Time < End_Time),
     CONSTRAINT fk_availability_doctor
-        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(Doctor_ID)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE AVAILABILITY_EXCEPTION (
-    Exception_ID   SERIAL      PRIMARY KEY,
-    Doctor_ID      INT         NOT NULL,
-    Exception_Date DATE        NOT NULL,
-    Is_Blocked     BOOLEAN     NOT NULL DEFAULT TRUE,
-    Start_Time     TIME        NULL,
-    End_Time       TIME        NULL,
-    Reason         VARCHAR(200),
-    CONSTRAINT uq_exception_doctor_date UNIQUE (Doctor_ID, Exception_Date),
-    CONSTRAINT chk_exception_times CHECK (
-        Is_Blocked OR (
-            Start_Time IS NOT NULL AND End_Time IS NOT NULL AND Start_Time < End_Time
-        )
-    ),
-    CONSTRAINT fk_exception_doctor
-        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(Doctor_ID)
+        FOREIGN KEY (Doctor_ID) REFERENCES DOCTOR(User_ID)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -183,7 +165,7 @@ CREATE OR REPLACE FUNCTION book_appointment(
 DECLARE
     v_admin_id INT;
 BEGIN
-    SELECT Admin_ID INTO v_admin_id FROM ADMIN ORDER BY Admin_ID LIMIT 1;
+    SELECT User_ID INTO v_admin_id FROM ADMIN ORDER BY User_ID LIMIT 1;
 
     INSERT INTO APPOINTMENT (Appointment_Date, Appointment_Time, Status, Reason, Patient_ID, Doctor_ID, Admin_ID)
     VALUES (p_date, p_time, 'Scheduled', p_reason, p_patient_id, p_doctor_id, v_admin_id);
@@ -236,10 +218,10 @@ BEGIN
     RETURN QUERY
     SELECT a.Appointment_ID, a.Appointment_Time, a.Status, a.Reason,
            (u.First_Name || ' ' || u.Last_Name)::TEXT AS patient_name,
-           p.Patient_ID
+           p.User_ID
     FROM APPOINTMENT a
-    JOIN PATIENT p ON a.Patient_ID = p.Patient_ID
-    JOIN "USER" u ON p.Patient_ID = u.User_ID
+    JOIN PATIENT p ON a.Patient_ID = p.User_ID
+    JOIN "USER" u ON p.User_ID = u.User_ID
     WHERE a.Doctor_ID = p_doctor_id
       AND a.Appointment_Date = p_date
     ORDER BY a.Appointment_Time;

@@ -15,12 +15,14 @@
 <a href="{% url 'doctor_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Welcome, Dr. {% if user %}{{ user.0 }} {{ user.1 }}{% endif %}</h1>
     <p>{{ today|date:"l, F j, Y" }}</p>
 </div>
+{% endblock %}
 
+{% block content %}
 <div class="calendar-grid">
     <div class="card calendar-card">
         <div class="calendar-header">

@@ -11,12 +11,14 @@
 <a href="{% url 'patient_profile' %}" class="nav-link"><i data-lucide="user-round"></i><span>Profile</span></a>
 {% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
     <h1>Medical History</h1>
     <p>Your past visit records and diagnoses.</p>
 </div>
+{% endblock %}
 
+{% block content %}
 {% if visits %}
     {% for v in visits %}
     <div class="card">

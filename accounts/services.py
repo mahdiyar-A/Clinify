@@ -1,6 +1,7 @@
 from django.contrib.auth.hashers import make_password
 
 from common.db import db_cursor
+from common.names import normalize_person_name
 
 from . import selectors
 
@@ -17,16 +18,18 @@ def register_patient(data):
     if selectors.email_exists(data['email']):
         raise ValueError('An account with this email already exists.')
 
+    first_name = normalize_person_name(data['first_name'])
+    last_name = normalize_person_name(data['last_name'])
     password_hash = make_password(data['password'])
     with db_cursor(commit=True) as cur:
         cur.execute(
             '''INSERT INTO "USER" (first_name, last_name, email, password_hash, role)
                VALUES (%s, %s, %s, %s, 'patient') RETURNING user_id''',
-            (data['first_name'], data['last_name'], data['email'], password_hash),
+            (first_name, last_name, data['email'], password_hash),
         )
         user_id = cur.fetchone()[0]
         cur.execute(
-            'INSERT INTO patient (patient_id) VALUES (%s)',
+            'INSERT INTO patient (user_id) VALUES (%s)',
             (user_id,),
         )
         cur.execute(
@@ -47,6 +50,8 @@ def register_doctor(data):
     if selectors.email_exists(data['email']):
         raise ValueError('An account with this email already exists.')
 
+    first_name = normalize_person_name(data['first_name'])
+    last_name = normalize_person_name(data['last_name'])
     password_hash = make_password(data['password'])
     with db_cursor(commit=True) as cur:
         cur.execute(
@@ -59,11 +64,11 @@ def register_doctor(data):
         cur.execute(
             '''INSERT INTO "USER" (first_name, last_name, email, password_hash, role)
                VALUES (%s, %s, %s, %s, 'doctor') RETURNING user_id''',
-            (data['first_name'], data['last_name'], data['email'], password_hash),
+            (first_name, last_name, data['email'], password_hash),
         )
         user_id = cur.fetchone()[0]
         cur.execute(
-            'INSERT INTO doctor (doctor_id, license_number) VALUES (%s, %s)',
+            'INSERT INTO doctor (user_id, license_number) VALUES (%s, %s)',
             (user_id, data['license_number']),
         )
     return user_id

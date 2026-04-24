@@ -4,6 +4,7 @@ import json
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from common.decorators import login_required_custom
@@ -129,6 +130,9 @@ def doctor_availability(request):
     DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
             'Friday', 'Saturday', 'Sunday']
 
+    form_values = {'days': [], 'start_time': '', 'end_time': ''}
+    had_error = False
+
     if request.method == 'POST':
         action = request.POST.get('action')
         try:
@@ -139,14 +143,15 @@ def doctor_availability(request):
                     request.POST.get('day_of_week')
                 ]
                 apply_days = [d for d in apply_days if d in DAYS]
-                if not apply_days:
-                    raise ValueError('Please select at least one day.')
-                for day in apply_days:
-                    services.add_availability(user_id, day, start, end)
+                form_values = {
+                    'days': apply_days, 'start_time': start or '', 'end_time': end or '',
+                }
+                services.add_availability_slots(user_id, apply_days, start, end)
                 messages.success(
                     request,
                     f"Slot added to {len(apply_days)} day{'s' if len(apply_days) != 1 else ''}.",
                 )
+                return redirect('doctor_availability')
             elif action == 'delete':
                 services.delete_availability(
                     user_id,
@@ -154,34 +159,21 @@ def doctor_availability(request):
                     request.POST.get('start_time'),
                 )
                 messages.success(request, 'Time slot removed.')
-            elif action == 'add_exception':
-                mode = request.POST.get('mode')  # 'block' or 'custom'
-                services.add_exception(
-                    user_id,
-                    request.POST.get('exception_date'),
-                    mode == 'block',
-                    request.POST.get('ex_start_time') or None,
-                    request.POST.get('ex_end_time') or None,
-                    request.POST.get('reason'),
-                )
-                messages.success(request, 'Exception saved.')
-            elif action == 'delete_exception':
-                services.delete_exception(
-                    user_id, int(request.POST.get('exception_id'))
-                )
-                messages.success(request, 'Exception removed.')
-        except Exception as e:
-            messages.error(request, f'Error: {e}')
-        return redirect('doctor_availability')
+                return redirect('doctor_availability')
+        except ValueError as e:
+            messages.error(request, str(e))
+            had_error = True
+        except Exception:
+            messages.error(request, 'Something went wrong. Please try again.')
+            had_error = True
+        if not had_error:
+            return redirect('doctor_availability')
 
-    today = timezone.localdate()
     try:
         rows = selectors.list_availability(user_id)
-        exceptions = selectors.list_exceptions(user_id, from_date=today)
     except Exception as e:
         messages.error(request, f'Error: {e}')
         rows = []
-        exceptions = []
 
     schedule_by_day = {d: [] for d in DAYS}
     for day, start, end in rows:
@@ -193,9 +185,8 @@ def doctor_availability(request):
 
     return render(request, 'doctor/availability.html', {
         'weekly': weekly,
-        'exceptions': exceptions,
-        'today_iso': today.isoformat(),
         'days': DAYS,
+        'form_values': form_values,
     })
 
 
@@ -300,16 +291,21 @@ def doctor_prescriptions(request):
             messages.success(request, 'Prescription created.')
             if return_to_appointment and visit_id:
                 return redirect('doctor_appointment', appointment_id=visit_id)
-        except Exception as e:
-            messages.error(request, f'Error: {e}')
-        return redirect('doctor_prescriptions')
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception:
+            messages.error(request, 'Something went wrong while creating the prescription. Please try again.')
+        url = reverse('doctor_prescriptions')
+        if visit_id:
+            url += f'?visit_id={visit_id}'
+        return redirect(url)
 
     try:
         prescriptions = selectors.list_prescriptions(user_id)
         medications = selectors.list_medications()
         visits = selectors.list_visits_for_prescriptions(user_id)
     except Exception as e:
-        messages.error(request, f'Error: {e}')
+        messages.error(request, 'Could not load prescriptions. Please try again.')
         prescriptions, medications, visits = [], [], []
 
     return render(request, 'doctor/prescriptions.html', {

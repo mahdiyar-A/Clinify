@@ -18,8 +18,8 @@ def list_recent_appointments(patient_id, limit=5):
                       u.first_name || ' ' || u.last_name AS doctor_name,
                       a.doctor_id
                FROM appointment a
-               JOIN doctor d ON a.doctor_id = d.doctor_id
-               JOIN "USER" u ON d.doctor_id = u.user_id
+               JOIN doctor d ON a.doctor_id = d.user_id
+               JOIN "USER" u ON d.user_id = u.user_id
                WHERE a.patient_id = %s
                ORDER BY a.appointment_date DESC, a.appointment_time DESC
                LIMIT %s''',
@@ -36,8 +36,8 @@ def get_next_scheduled_appointment(patient_id):
                       u.first_name || ' ' || u.last_name AS doctor_name,
                       d.specialty
                FROM appointment a
-               JOIN doctor d ON a.doctor_id = d.doctor_id
-               JOIN "USER" u ON d.doctor_id = u.user_id
+               JOIN doctor d ON a.doctor_id = d.user_id
+               JOIN "USER" u ON d.user_id = u.user_id
                WHERE a.patient_id = %s
                  AND a.status = 'Scheduled'
                  AND (a.appointment_date > CURRENT_DATE
@@ -57,8 +57,8 @@ def list_all_appointments(patient_id):
                       u.first_name || ' ' || u.last_name AS doctor_name,
                       a.doctor_id
                FROM appointment a
-               JOIN doctor d ON a.doctor_id = d.doctor_id
-               JOIN "USER" u ON d.doctor_id = u.user_id
+               JOIN doctor d ON a.doctor_id = d.user_id
+               JOIN "USER" u ON d.user_id = u.user_id
                WHERE a.patient_id = %s
                ORDER BY a.appointment_date DESC, a.appointment_time DESC''',
             (patient_id,),
@@ -69,14 +69,16 @@ def list_all_appointments(patient_id):
 def list_doctors():
     with db_cursor() as cur:
         cur.execute(
-            '''SELECT d.doctor_id, u.first_name || ' ' || u.last_name, d.specialty
-               FROM doctor d JOIN "USER" u ON d.doctor_id = u.user_id'''
+            '''SELECT d.user_id, u.first_name || ' ' || u.last_name, d.specialty
+               FROM doctor d
+               JOIN "USER" u ON d.user_id = u.user_id
+               WHERE u.is_active = TRUE'''
         )
         return cur.fetchall()
 
 
 def availability_map():
-    """Return {doctor_id: {slots: [...], exceptions: {date: {...}}}}."""
+    """Return {doctor_id: {slots: [...], booked: {'YYYY-MM-DD': ['HH:MM',...]}}}."""
     with db_cursor() as cur:
         cur.execute(
             'SELECT doctor_id, day_of_week, start_time, end_time '
@@ -84,25 +86,24 @@ def availability_map():
         )
         slot_rows = cur.fetchall()
         cur.execute(
-            '''SELECT doctor_id, exception_date, is_blocked, start_time, end_time
-               FROM availability_exception
-               WHERE exception_date >= CURRENT_DATE'''
+            '''SELECT doctor_id, appointment_date, appointment_time
+               FROM appointment
+               WHERE status = 'Scheduled'
+                 AND appointment_date >= CURRENT_DATE'''
         )
-        exc_rows = cur.fetchall()
+        booked_rows = cur.fetchall()
 
     out = {}
     for doctor_id, day, start, end in slot_rows:
-        entry = out.setdefault(str(doctor_id), {'slots': [], 'exceptions': {}})
+        entry = out.setdefault(str(doctor_id), {'slots': [], 'booked': {}})
         entry['slots'].append({
             'day': day, 'start': str(start)[:5], 'end': str(end)[:5],
         })
-    for doctor_id, date, is_blocked, start, end in exc_rows:
-        entry = out.setdefault(str(doctor_id), {'slots': [], 'exceptions': {}})
-        entry['exceptions'][date.isoformat()] = {
-            'is_blocked': bool(is_blocked),
-            'start': str(start)[:5] if start else None,
-            'end': str(end)[:5] if end else None,
-        }
+    for doctor_id, appt_date, appt_time in booked_rows:
+        entry = out.setdefault(str(doctor_id), {'slots': [], 'booked': {}})
+        entry['booked'].setdefault(appt_date.isoformat(), []).append(
+            str(appt_time)[:5]
+        )
     return out
 
 
@@ -112,7 +113,7 @@ def get_profile(patient_id):
             '''SELECT u.first_name, u.last_name, u.email, u.phone,
                       p.date_of_birth, p.gender, p.address,
                       p.emergency_contact_name, p.emergency_contact_phone
-               FROM "USER" u JOIN patient p ON u.user_id = p.patient_id
+               FROM "USER" u JOIN patient p ON u.user_id = p.user_id
                WHERE u.user_id = %s''',
             (patient_id,),
         )
@@ -126,8 +127,8 @@ def list_visits(patient_id):
                       u.first_name || ' ' || u.last_name AS doctor_name
                FROM visit v
                JOIN appointment a ON v.appointment_id = a.appointment_id
-               JOIN doctor d ON a.doctor_id = d.doctor_id
-               JOIN "USER" u ON d.doctor_id = u.user_id
+               JOIN doctor d ON a.doctor_id = d.user_id
+               JOIN "USER" u ON d.user_id = u.user_id
                WHERE v.patient_id = %s ORDER BY v.visit_date DESC''',
             (patient_id,),
         )
